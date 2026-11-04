@@ -1,0 +1,36 @@
+/* styles/tokens.css — design tokens (:root variables)
+   (split out of the old index.html <style> by migrate.js; load order: tokens → base → layout → components → pages) */
+
+:root {
+  --bg: #0D0D0D;
+  --panel: #171717;
+  --panel-2: #1F1F1F;
+  --hover: #262626;
+  --line: #2A2A2A;
+  --rule: #333;
+  --ink: #ECECEC;
+  --mut: #9A9A9A;
+  --accent: #4D6BFE;
+  --accent-2: #6B84FF;
+  --accent-t: #1B2456;
+  --ok: #3DD68C;
+  --ok-t: #132A20;
+  --warn: #F5A524;
+  --warn-t: #2A2110;
+  --err: #FF5C5C;
+  --err-t: #2A1414;
+  --cover: var(--panel);
+  --foil: var(--accent);
+  --paper: var(--bg);
+  --ui: "Inter", "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, Roboto, "Noto Sans Devanagari", "Mukta", "Helvetica Neue", Arial, sans-serif;
+  --pad: 20px;
+  --hdr: 64px;
+  --r: 14px;
+}
+
+/* ---------- roomier layout ---------- */
+
+:root {
+  --hdr: 72px;
+  --pad: 24px
+}

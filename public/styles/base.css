@@ -1,0 +1,182 @@
+/* styles/base.css — reset, body, links, inputs, buttons
+   (split out of the old index.html <style> by migrate.js; load order: tokens → base → layout → components → pages) */
+
+* {
+  box-sizing: border-box
+}
+
+[hidden] {
+  display: none !important
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  color-scheme: dark
+}
+
+body {
+  margin: 0;
+  font: 14px/1.55 var(--ui);
+  background: var(--bg);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased
+}
+
+::selection {
+  background: #4D6BFE55;
+  color: #fff
+}
+
+/* ---------- forms ---------- */
+
+input,
+select,
+textarea,
+button {
+  font: inherit
+}
+
+input,
+select,
+textarea {
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel-2);
+  color: var(--ink);
+  min-height: 38px;
+  width: 100%;
+  transition: border-color .12s, box-shadow .12s, background .12s;
+  color-scheme: dark
+}
+
+input::placeholder {
+  color: #6B6B6B
+}
+
+input:hover,
+select:hover {
+  border-color: #3A3A3A
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: 0;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(77, 107, 254, .22);
+  background: var(--panel)
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px
+}
+
+input[type=checkbox] {
+  width: 16px;
+  height: 16px;
+  min-height: 0;
+  accent-color: var(--accent)
+}
+
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 32px;
+  background: var(--panel-2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 4.5 6 8l3.5-3.5' fill='none' stroke='%239A9A9A' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 11px center/12px
+}
+
+input[type=search] {
+  padding-left: 34px;
+  background: var(--panel-2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239A9A9A' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E") no-repeat 11px center/16px
+}
+
+button {
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  padding: 7px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  min-height: 36px;
+  font-weight: 500;
+  transition: background .12s, border-color .12s, transform .05s
+}
+
+button:hover {
+  background: var(--hover);
+  border-color: #3A3A3A
+}
+
+button:active {
+  transform: translateY(1px)
+}
+
+button.p {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  font-weight: 600;
+  padding: 8px 18px
+}
+
+button.p:hover {
+  background: var(--accent-2);
+  border-color: var(--accent-2)
+}
+
+button.d {
+  color: var(--err);
+  border-color: transparent;
+  background: none
+}
+
+button.d:hover {
+  background: var(--err-t);
+  border-color: transparent
+}
+
+button.x {
+  border: 0;
+  background: none;
+  color: var(--mut);
+  font-size: 20px;
+  line-height: 1;
+  padding: 4px 10px
+}
+
+button.x:hover {
+  color: var(--err);
+  background: var(--err-t)
+}
+
+button.wide {
+  width: 100%
+}
+
+a {
+  color: var(--accent-2);
+  text-decoration-color: #4D6BFE66;
+  text-underline-offset: 2px
+}
+
+a:hover {
+  text-decoration-color: currentColor
+}
+
+/* ---------- responsive ---------- */
+
+@media(prefers-reduced-motion:reduce) {
+  * {
+      transition: none !important;
+      animation: none !important
+    }
+}
+
+@media(prefers-reduced-motion:reduce) {
+  * {
+      transition: none !important;
+      animation: none !important
+    }
+}

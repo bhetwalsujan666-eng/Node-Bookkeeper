@@ -1,0 +1,862 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><meta name="theme-color" content="#4E1521">
+<title>Travel Co. Accounts</title>
+<style>
+:root{
+ --cover:#4E1521;--cover2:#3A0F18;--foil:#D8B26A;
+ --ink:#1E2230;--mut:#656A77;--line:#E4E2DB;--rule:#D3D0C7;
+ --paper:#F5F4F0;--card:#fff;--wash:#F8F7F3;--tint:#EFEDE6;
+ --blue:#27418F;--blue2:#1B3073;--blue-t:#E9EDF8;
+ --ok:#1D7448;--ok-t:#E1F1E7;--warn:#8A5300;--warn-t:#FDF0D3;--err:#B42318;--err-t:#FDEBE8;
+ --pine:var(--cover);--gold:var(--foil);--bg:var(--paper);
+ --ui:"Inter","Segoe UI Variable Text","Segoe UI",system-ui,-apple-system,Roboto,"Noto Sans Devanagari","Mukta","Helvetica Neue",Arial,sans-serif;
+ --pad:20px;--hdr:72px;--r:12px;
+}
+*{box-sizing:border-box}[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;font:14px/1.5 var(--ui);background:var(--paper);color:var(--ink);-webkit-font-smoothing:antialiased}
+::selection{background:#27418F33}
+.app{display:grid;grid-template-columns:252px minmax(0,1fr);min-height:100vh}.app>div{min-width:0}
+
+/* ---------- sidebar: the ledger cover ---------- */
+.side{position:sticky;top:0;height:100vh;overflow:auto;display:flex;flex-direction:column;padding:24px 14px 16px 16px;color:#F0E2E4;
+ background:var(--cover) repeating-linear-gradient(135deg,#ffffff07 0 1px,transparent 1px 4px);scrollbar-width:thin;scrollbar-color:#ffffff30 transparent}
+.side::after{content:"";position:absolute;top:12px;bottom:12px;right:7px;border-right:1px dashed #D8B26A55;pointer-events:none}
+.brand{position:relative;padding:0 10px 16px;margin-bottom:6px;border-bottom:3px double #D8B26A66}
+.brand .short{display:none}
+.tog{position:absolute;top:2px;right:2px;display:grid;place-items:center;width:30px;height:30px;padding:0;border:1px solid #ffffff2e;border-radius:8px;background:none;color:#F0E2E4;cursor:pointer;transition:background .12s}
+.tog:hover{background:#ffffff1c}
+.tog svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .18s}
+.brand .dev{font:700 36px/1.15 var(--ui);color:var(--foil)}
+.brand .lat{margin-top:4px;font-size:12.5px;color:#D3AEB6}
+.side nav{flex:1}
+.ng{margin:20px 0 6px;padding:0 10px;font-size:12px;font-weight:600;color:#CDA3AC;letter-spacing:.02em}
+.side nav button{display:flex;align-items:center;gap:11px;width:100%;min-height:36px;text-align:left;background:none;border:0;border-radius:8px;color:#F0E2E4;padding:7px 10px;cursor:pointer;font:500 14px var(--ui);transition:background .12s}
+.side nav button svg{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;opacity:.75}
+.side nav button:hover{background:#ffffff14}
+.side nav button.on{background:#ffffff1f;color:#fff;font-weight:600;box-shadow:inset 3px 0 0 var(--foil)}
+.side nav button.on svg{stroke:var(--foil);opacity:1}
+.side :focus-visible{outline:2px solid var(--foil);outline-offset:-2px}
+.co{margin-top:14px;padding:12px 10px 0 10px;border-top:1px solid #ffffff22;font-size:12px;line-height:1.45;color:#CDA3AC}
+.co b{display:block;color:#F0E2E4;font-weight:600;font-size:12.5px}
+
+/* ---------- page header ---------- */
+.top{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:16px;flex-wrap:wrap;min-height:var(--hdr);padding:12px 28px;background:rgba(245,244,240,.9);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top h1{margin:0;font:650 22px/1.2 var(--ui);letter-spacing:-.015em}
+.top .tt p{margin:2px 0 0;font-size:13px;color:var(--mut)}
+.period{margin-left:auto;display:flex;align-items:center;gap:4px;padding:3px 4px 3px 12px;background:var(--card);border:1px solid var(--line);border-radius:10px;font-size:12.5px;color:var(--mut);transition:opacity .15s}
+.period.off{opacity:.42}
+.period input{width:auto;min-height:28px;padding:2px 4px;border:0;background:transparent;font-size:13px;color:var(--ink);border-radius:6px}
+.period input:focus{box-shadow:none;background:var(--blue-t)}
+.period select{width:auto;min-height:28px;border:0;border-left:1px solid var(--line);border-radius:0 7px 7px 0;background-color:transparent;padding:2px 26px 2px 10px;color:var(--blue);font-weight:600;font-size:12.5px}
+main{padding:24px 28px 72px;max-width:1280px}
+
+/* ---------- surfaces ---------- */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:var(--pad);margin-bottom:16px;overflow:hidden}
+.card>.ch{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:-2px 0 14px}
+.card>.ch h2{margin:0;font:650 15.5px/1.3 var(--ui);letter-spacing:-.005em}
+.card>.ch .sp{margin-left:auto}
+.tw{overflow-x:auto;margin:0 calc(var(--pad)*-1) calc(var(--pad)*-1 - 1px);border-top:1px solid var(--line)}
+.card>.tw:first-child,.card>.tws[hidden]:first-child+.tw{margin-top:calc(var(--pad)*-1);border-top:0}
+/* mirrored scrollbar above a table that is wider than its card (kept in sync by JS) */
+.tw,.tws{scrollbar-width:thin;scrollbar-color:#B9B6AB var(--wash)}
+.tws{overflow-x:auto;overflow-y:hidden;min-height:10px;margin:0 calc(var(--pad)*-1);border-top:1px solid var(--line)}
+.tws>div{height:1px}
+.card>.tws:first-child{margin-top:calc(var(--pad)*-1);border-top:0}
+.tws:not([hidden])+.tw{border-top:0}
+.sub{margin:0 0 14px;color:var(--mut);font-size:13px}
+.sheet{max-width:860px}
+.tool{margin:0 0 14px}
+.fh{display:flex;align-items:center;gap:12px;margin:22px 0 10px;font-weight:600;font-size:13px;color:var(--ink)}
+.fh::after{content:"";flex:1;height:1px;background:var(--line)}
+.fh:first-child{margin-top:0}
+
+/* ---------- forms ---------- */
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(180px,100%),1fr));gap:14px;margin-bottom:6px;align-items:end}
+.row label,.fld{display:flex;flex-direction:column;font-size:12.5px;font-weight:500;gap:5px;color:var(--mut)}
+.row .w2{grid-column:span 2}.row .w4{grid-column:1/-1}
+input,select,textarea,button{font:inherit}
+input,select,textarea{padding:7px 11px;border:1px solid var(--rule);border-radius:8px;background:#fff;color:var(--ink);min-height:36px;width:100%;transition:border-color .12s,box-shadow .12s}
+input::placeholder{color:#9A9DA8}
+input:hover,select:hover{border-color:#B9B6AB}
+input:focus,select:focus,textarea:focus{outline:0;border-color:var(--blue);box-shadow:0 0 0 3px #27418F26}
+:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
+input[type=checkbox]{width:16px;height:16px;min-height:0;accent-color:var(--blue)}
+select{appearance:none;-webkit-appearance:none;padding-right:32px;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 4.5 6 8l3.5-3.5' fill='none' stroke='%23656A77' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 11px center/12px}
+input[type=search]{padding-left:34px;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23656A77' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E") no-repeat 11px center/16px}
+td input{border-color:transparent;background:var(--wash)}td input:hover{border-color:var(--rule);background:#fff}
+button{background:#fff;border:1px solid var(--rule);color:var(--ink);padding:6px 14px;border-radius:8px;cursor:pointer;min-height:34px;font-weight:500;transition:background .12s,border-color .12s,transform .05s}
+button:hover{background:var(--wash);border-color:#B9B6AB}
+button:active{transform:translateY(1px)}
+button.p{background:var(--blue);border-color:var(--blue);color:#fff;font-weight:600;padding:8px 18px}
+button.p:hover{background:var(--blue2);border-color:var(--blue2)}
+button.d{color:var(--err);border-color:transparent;background:none}button.d:hover{background:var(--err-t)}
+button.x{border:0;background:none;color:var(--mut);font-size:20px;line-height:1;padding:4px 10px}button.x:hover{color:var(--err);background:var(--err-t)}
+button.wide{width:100%}
+a{color:var(--blue);text-decoration-color:#27418F55;text-underline-offset:2px}a:hover{text-decoration-color:currentColor}
+.err{color:var(--err)}.ok{color:var(--ok)}
+.warn{display:flex;align-items:center;flex-wrap:wrap;gap:6px 12px;background:var(--warn-t);border:1px solid #EBCB87;border-radius:10px;padding:10px 14px;margin:0 0 16px;color:var(--warn)}
+.warn.err{color:var(--warn)}
+.note{background:var(--blue-t);border-left:3px solid var(--blue);border-radius:4px 10px 10px 4px;padding:10px 14px;margin-bottom:14px;color:#22305F}
+.chip{display:inline-flex;align-items:center;gap:6px;background:var(--tint);color:#3F4350;border-radius:99px;padding:1px 10px;font-size:12px;font-weight:500;line-height:1.7;white-space:nowrap}
+.chip.ok{background:var(--ok-t);color:var(--ok)}
+.chip.due{background:var(--warn-t);color:var(--warn)}
+.chip.ok::before,.chip.due::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.chip a{color:inherit;text-decoration:none;margin-left:2px;font-size:14px;line-height:1}
+.chk{display:flex;flex-direction:row!important;align-items:center;gap:10px;color:var(--ink)!important;font-size:13px!important;font-weight:400!important;border:1px solid var(--line);border-radius:10px;padding:9px 12px;background:#fff;cursor:pointer}
+.chk:hover{border-color:var(--rule);background:var(--wash)}
+
+/* ---------- tables: ruled like a ledger ---------- */
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+.tw th:first-child,.tw td:first-child{padding-left:var(--pad)}
+.tw th:last-child,.tw td:last-child{padding-right:var(--pad)}
+th{font-size:12px;font-weight:600;color:var(--mut);background:var(--wash);white-space:nowrap;border-bottom-color:var(--rule)}
+td.n,th.n{text-align:right;white-space:nowrap}
+.tw td:first-child{white-space:nowrap}
+.md .tw td:nth-child(-n+2){white-space:nowrap}
+.lc .tw td:first-child{white-space:normal}
+.md .act{white-space:normal;min-width:84px}.md .act>*{display:inline-block;margin:2px 4px 2px 0}
+.md .tw td:nth-child(3){min-width:150px}
+.lc .tw td:nth-child(3){min-width:0}
+#rbody td:nth-child(2){min-width:150px}
+.sheet td.n,.sheet th.n{width:210px}
+.tw td.n,.tw th.n{border-left:1px solid var(--line)}
+.lc td.n{border-left:0}
+tbody tr:hover td{background:#FBFAF7}
+tr.t td{font-weight:700;background:var(--wash);border-top:1px solid var(--ink);border-bottom:3px double var(--ink)}
+tr.sec th{background:var(--cover);color:#fff;font-size:12.5px;padding-top:8px;padding-bottom:8px;border-bottom:0}
+tr.grp td{color:var(--mut);font-weight:600;font-size:12.5px;background:var(--wash);padding-top:7px;padding-bottom:7px}
+td.ind{padding-left:34px!important}
+tr.vs td{border-top:1px solid #BDB9AE}
+td small{color:var(--mut);font-size:12px}
+.act{white-space:nowrap}.act>*{margin-right:4px}.act>*:last-child{margin-right:0}
+.act button{min-height:28px;padding:2px 10px;font-size:13px}
+.act a{font-size:13px;margin-right:6px}
+td.empty{text-align:center;color:var(--mut);padding:30px}
+tr.click{cursor:pointer}
+tr.sel td{background:var(--blue-t)!important}
+tr.sel td:first-child{box-shadow:inset 3px 0 0 var(--blue)}
+.actbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:16px}
+.md{display:grid;grid-template-columns:minmax(240px,270px) minmax(0,1fr);gap:16px;align-items:start}
+.lc{position:sticky;top:calc(var(--hdr) + 16px);max-height:calc(100vh - var(--hdr) - 32px);overflow:auto}
+
+/* ---------- segmented switch ---------- */
+.seg{display:inline-flex;gap:2px;max-width:100%;overflow-x:auto;background:#E9E7E0;border-radius:10px;padding:3px;margin-bottom:16px}
+.seg button{border:0;background:none;padding:6px 16px;min-height:34px;border-radius:8px;color:var(--mut);font-weight:600;white-space:nowrap}
+.seg button:hover{background:#ffffff80;color:var(--ink)}
+.seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 2px #1e223018,0 0 0 1px #1e22300d}
+.seg i{font-style:normal;font-weight:500;font-size:12px;margin-left:8px;padding:0 7px;border-radius:99px;background:#1e22300f;color:var(--mut)}
+.seg button.on i{background:var(--blue-t);color:var(--blue)}
+#bw[data-k=purchase] .pane-s,#bw[data-k=sales] .pane-p{display:none}
+
+/* ---------- bill stub ---------- */
+.split{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:16px;align-items:start}
+.stub{position:sticky;top:calc(var(--hdr) + 16px);background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;box-shadow:0 14px 28px -18px #3A0F1899}
+.stub .hd{background:var(--cover);color:#fff;padding:12px 18px;font:650 15px var(--ui);border-bottom:3px solid var(--foil)}
+.stub .bd{padding:16px 18px 18px}
+.stub dl{margin:0;display:grid;grid-template-columns:1fr auto;gap:8px 12px;color:var(--mut)}
+.stub dd{margin:0;text-align:right;color:var(--ink);font-variant-numeric:tabular-nums}
+.stub .tt{display:flex;justify-content:space-between;align-items:baseline;margin:16px 0;padding-top:14px;border-top:2px dashed var(--rule);position:relative}
+.stub .tt b{font:700 26px var(--ui);letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+.stub .tt::before,.stub .tt::after{content:"";position:absolute;top:-9px;width:16px;height:16px;border-radius:50%;background:var(--paper);border:1px solid var(--line)}
+.stub .tt::before{left:-27px}.stub .tt::after{right:-27px}
+.stub button+button{margin-top:8px}
+#sbd p{margin:0 0 14px}
+
+/* ---------- voucher balance bar ---------- */
+.bar{position:sticky;bottom:14px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:12px 18px;box-shadow:0 14px 30px -16px #1e223066}
+#tot{display:flex;gap:22px;align-items:center;font-variant-numeric:tabular-nums}
+#tot span{color:var(--mut)}
+#tot b{font-weight:650;margin-left:6px;color:var(--ink)}
+#tot .ok{color:var(--ok)}#tot .err{color:var(--err)}
+#tot .ok b,#tot .err b{color:inherit;margin-left:0}
+.bar .sp{margin-left:auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+
+/* ---------- figure strips ---------- */
+.vat{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));margin-bottom:16px;background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.vat>div{min-width:0;padding:14px 18px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);margin:0 -1px -1px 0}
+.vat span{display:block;font-size:12.5px;color:var(--mut)}
+.vat b{display:block;margin-top:2px;font:650 22px/1.3 var(--ui);letter-spacing:-.01em;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.vat small{display:block;color:var(--mut);font-size:12px;margin-top:2px}
+.vat .net{background:var(--cover);color:#fff}.vat .net span,.vat .net small{color:#E5C9CF}
+.vat.k4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.card>.vat{border-radius:10px}
+
+/* ---------- dashboard ---------- */
+#toast{display:none;position:fixed;right:22px;bottom:22px;max-width:440px;background:var(--ink);color:#fff;padding:13px 18px;border-radius:12px;border-left:4px solid var(--foil);box-shadow:0 18px 40px -12px #0008;white-space:pre-line;overflow-wrap:anywhere;z-index:20;animation:tin .22s ease-out}
+@keyframes tin{from{opacity:0;transform:translateY(10px)}}
+.dash{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(420px,100%),1fr));gap:16px;align-items:start}.dash .card{margin:0}.dash .full{grid-column:1/-1}
+.hb{display:grid;grid-template-columns:minmax(70px,130px) 1fr auto;gap:2px 12px;align-items:center;margin:10px 0;font-size:13px}.hb>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hb>div{background:var(--tint);border-radius:99px;height:10px}.hb i{display:block;height:100%;border-radius:99px}.hb b{font-variant-numeric:tabular-nums;font-weight:600}.hb small{grid-column:2/-1;color:var(--mut);font-size:12px}
+.lg{display:flex;gap:16px;flex-wrap:wrap;margin:8px 0 0;font-size:12px;color:var(--mut)}.lg i,.lgi i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px}
+.dn{display:flex;gap:20px;align-items:center;flex-wrap:wrap}.dn>div{min-width:170px;flex:1}.lgi{display:flex;align-items:center;font-size:13px;margin:6px 0}.lgi b{margin-left:auto;padding-left:14px;font-weight:600}
+.fl{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.fl input,.fl select{width:auto;min-width:130px}.fl input[type=search]{min-width:260px;flex:1}
+.fl label{flex-direction:row;align-items:center;gap:6px}
+.ag{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:24px}.ag h3{margin:0 0 6px;font:600 13px var(--ui);color:var(--ink)}
+
+/* ---------- collapsed sidebar: slim icon strip (wide layout only) ---------- */
+@media(min-width:861px){
+ .app{transition:grid-template-columns .18s ease}
+ .app.sc{grid-template-columns:68px minmax(0,1fr)}
+ .sc .side{padding:18px 8px 12px}
+ .sc .brand{display:flex;flex-direction:column;align-items:center;gap:10px;padding:0 0 12px}
+ .sc .brand .full,.sc .brand .lat,.sc .co{display:none}
+ .sc .brand .short{display:inline}.sc .brand .dev{font-size:24px}
+ .sc .tog{position:static}.sc .tog svg{transform:rotate(180deg)}
+ .sc .ng{height:1px;margin:10px 10px;padding:0;font-size:0;background:#ffffff22}
+ .sc .side nav button{justify-content:center;padding:7px 0}
+ .sc .side nav button span{display:none}
+ .sc .side nav button.on{box-shadow:inset 3px 0 0 var(--foil)}
+}
+
+/* ---------- responsive ---------- */
+@media(max-width:1100px){.vat.k4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:1000px){.split{grid-template-columns:1fr}.stub{position:static}.md{grid-template-columns:1fr}.lc{position:static;max-height:none}}
+@media(max-width:860px){
+ .app{grid-template-columns:minmax(0,1fr)}
+ .side{position:static;height:auto;padding:10px 10px 0;overflow:visible}.side::after,.co,.ng,.tog{display:none}
+ .brand{display:flex;align-items:baseline;gap:10px;padding:0 6px 8px;margin:0;border:0}.brand .dev{font-size:24px}.brand .lat{margin:0}
+ .side nav{flex:none;display:flex;overflow-x:auto;gap:2px;padding-bottom:8px}
+ .side nav button{width:auto;white-space:nowrap}.side nav button.on{box-shadow:inset 0 -3px 0 var(--foil)}
+ .top{position:static;padding:12px 14px}.period{margin-left:0;flex-wrap:wrap}main{padding:16px 12px 60px}
+ .row .w2{grid-column:auto}.vat.k4{grid-template-columns:repeat(2,minmax(0,1fr))}.vat b{font-size:19px}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@media print{.side,.tws,.period,.tool,button,.bar,.seg{display:none!important}.app{display:block}.top{position:static;border:0;background:none}main{padding:0;max-width:none}.card{border:0;padding:0}}
+</style></head><body>
+<div class="app">
+<aside class="side">
+<div class="brand"><div class="dev" lang="ne"><span class="full">लेखा</span><span class="short">ले</span></div><div class="lat">Travel &amp; Tours accounts</div>
+<button class="tog" id="sbtog" type="button" onclick="toggleSide()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg></button></div>
+<nav id="nav" aria-label="Main"></nav>
+<div class="co"><b id="co"></b><span id="cov"></span></div>
+</aside>
+<div class="pg">
+<header class="top"><div class="tt"><h1 id="pgt"></h1><p id="pgs"></p></div>
+<div class="period" id="period"><span>Period</span><input type="date" id="from" aria-label="From date" onchange="if(!NOPERIOD.includes(tab))render()"><span aria-hidden="true">to</span><input type="date" id="to" aria-label="To date" onchange="if(!NOPERIOD.includes(tab))render()">
+<select id="pq" aria-label="Quick range" onchange="quickPeriod(this.value)"><option value="">Quick range</option><option value="fy">This fiscal year</option><option value="pfy">Last fiscal year</option><option value="m">This month</option><option value="all">All dates</option></select></div></header>
+<main id="m"></main></div></div>
+<div id="toast" role="status" aria-live="polite"></div><datalist id="al"></datalist><datalist id="pls"></datalist><datalist id="plc"></datalist><datalist id="stf"></datalist>
+<script>
+let D, tab = 'dash'; const $ = s => document.querySelector(s);
+const ymd = (d = new Date()) => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); // local date, not UTC
+const f = n => (+n).toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2}); // lakh/crore grouping
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const TABS = {dash:'Dashboard',rec:'Records',stmt:'Statements',sal:'Salary payment',voucher:'New voucher',bills:'Purchase & sales bills',rcv:'Payments received',pay:'Payments made',reg:'VAT registers',daybook:'Day book',ledger:'Ledger',tb:'Trial balance',pl:'Income statement',bs:'Balance sheet',coa:'Accounts',parties:'Parties',settings:'Settings'};
+const ic = p => `<svg viewBox="0 0 24 24" aria-hidden="true">${p}</svg>`;
+const IC = {
+ dash: ic('<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>'),
+ rec: ic('<path d="M4 4h16v5H4z"/><path d="M5 9v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9"/><path d="M10 13h4"/>'),
+ stmt: ic('<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h6"/>'),
+ sal: ic('<rect x="3" y="6" width="18" height="14" rx="2"/><path d="M3 10h18"/><circle cx="16.5" cy="15" r="1"/>'),
+ voucher: ic('<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>'),
+ bills: ic('<path d="M5 3h14v18l-2.3-1.5L14.3 21 12 19.5 9.7 21l-2.4-1.5L5 21Z"/><path d="M9 8h6M9 12h6"/>'),
+ rcv: ic('<path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/>'),
+ pay: ic('<path d="M12 15V3"/><path d="m7 8 5-5 5 5"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/>'),
+ reg: ic('<path d="M5 3h12a2 2 0 0 1 2 2v16H7a2 2 0 0 1-2-2Z"/><path d="M5 19a2 2 0 0 1 2-2h12"/><path d="M9 7h6M9 11h6"/>'),
+ daybook: ic('<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>'),
+ ledger: ic('<path d="M12 6.5C10.5 5 8 4.5 3 4.5v14c5 0 7.5.5 9 2 1.5-1.5 4-2 9-2v-14c-5 0-7.5.5-9 2Z"/><path d="M12 6.5v14"/>'),
+ tb: ic('<path d="M12 3v18M7 21h10"/><path d="M5 7h14"/><path d="m5 7-3 7a4 4 0 0 0 6 0Z"/><path d="m19 7-3 7a4 4 0 0 0 6 0Z"/>'),
+ pl: ic('<path d="m3 17 6-6 4 4 8-8"/><path d="M15 7h6v6"/>'),
+ bs: ic('<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M12 4v16"/><path d="M6.5 9h2M6.5 13h2M15.5 9h2M15.5 13h2"/>'),
+ coa: ic('<path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/>'),
+ parties: ic('<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7"/><path d="M18 14a6 6 0 0 1 3.5 6"/>'),
+ settings: ic('<path d="M3 7h9M16 7h5"/><circle cx="14" cy="7" r="2"/><path d="M3 17h5M12 17h9"/><circle cx="10" cy="17" r="2"/>')};
+const TSUB = {
+ dash: 'How the business is doing in the selected period.',
+ rec: 'Find, edit or delete anything you have entered.',
+ stmt: 'Statements for suppliers, customers, staff and expenses.',
+ sal: 'Record salary paid to staff.',
+ voucher: 'Post a manual journal, payment or receipt voucher.',
+ bills: 'Enter supplier bills and make VAT invoices for customers.',
+ rcv: 'Money received from customers, and what is still due.',
+ pay: 'Money paid to suppliers, and what is still owed.',
+ reg: 'Purchase and sales books for your VAT return.',
+ daybook: 'Every voucher in date order.',
+ ledger: 'All entries for one account, with a running balance.',
+ tb: 'Debit and credit balance of every account.',
+ pl: 'Income, costs and profit for the period.',
+ bs: 'Assets, liabilities and equity as at the end date.',
+ coa: 'The accounts available in vouchers and reports.',
+ parties: 'Suppliers and customers saved for the bill forms.',
+ settings: 'Storage folder, categories, bank accounts and company details.'};
+const NAV = [['Overview',['dash']],['Enter',['voucher','bills','rcv','pay','sal']],['Records',['rec','stmt','daybook']],['Books',['ledger','reg']],['Reports',['tb','pl','bs']],['Setup',['coa','parties','settings']]];
+const NOPERIOD = ['voucher','bills','rcv','pay','sal','rec','stmt','coa','parties','settings'];
+const acc = c => D.accounts.find(a => a.code == c), nm = c => acc(c) ? c + ' ' + acc(c).name : c;
+const FR = () => $('#from').value, TO = () => $('#to').value;
+const cum = d => d <= TO(), per = d => d >= FR() && d <= TO(), pre = d => d < FR();
+const net = (c, p) => D.vouchers.reduce((s,v) => p(v.date) ? s + v.lines.reduce((t,l) => l.account == c ? t + l.dr - l.cr : t, 0) : s, 0); // Dr - Cr
+const closing = a => net(a.code, 'ALE'.includes(a.type) ? cum : per);
+const priorPL = () => D.accounts.filter(a => 'IX'.includes(a.type)).reduce((s,a) => s + net(a.code, pre), 0); // Dr-Cr; profit = -this
+const ofType = t => D.accounts.filter(a => t.includes(a.type));
+const groups = list => [...new Set(list.map(a => a.group))];
+
+const hid = () => { const n = D.vouchers.filter(v => v.date < FR() || v.date > TO()).length; return n ? `<div class="warn err">${n} voucher(s) have dates outside ${FR()} to ${TO()}, so they are not fully shown here. <button onclick="showAll()">Show all dates</button></div>` : ''; };
+function quickPeriod(k) { const t = new Date(), p = n => String(n).padStart(2, '0'), s = (y, m, d) => y + '-' + p(m) + '-' + p(d), fy = t.getMonth() > 5 && !(t.getMonth() == 6 && t.getDate() < 16) ? t.getFullYear() : t.getFullYear() - 1; $('#pq').value = '';
+  if (k == 'all') return showAll();
+  const r = {fy: [s(fy, 7, 16), s(fy + 1, 7, 15)], pfy: [s(fy - 1, 7, 16), s(fy, 7, 15)], m: [s(t.getFullYear(), t.getMonth() + 1, 1), s(t.getFullYear(), t.getMonth() + 1, new Date(t.getFullYear(), t.getMonth() + 1, 0).getDate())]}[k];
+  if (!r) return; $('#from').value = r[0]; $('#to').value = r[1]; if (!NOPERIOD.includes(tab)) render(); }
+function showAll() { const ds = D.vouchers.map(v => v.date).sort(); if (!ds.length) return; $('#from').value = ds[0]; $('#to').value = ds[ds.length - 1]; render(); }
+const badAD = d => d && +d.slice(0, 4) > 2060 && (alert('The Date (AD) field says year ' + d.slice(0, 4) + ', which looks like a BS date. Put the English (AD) date there and type the BS date in the BS field.'), true);
+const resolveAcc = t => { t = t.trim().toLowerCase(); if (!t) return null; const A = D.accounts;
+  const ex = A.find(a => t == a.code || t == a.name.toLowerCase() || t == (a.code + ' ' + a.name).toLowerCase()) || A.find(a => a.code == t.split(' ')[0]); if (ex) return ex.code;
+  const part = A.filter(a => a.name.toLowerCase().includes(t)); return part.length == 1 ? part[0].code : null; };
+const showErr = m => { $('#msg').innerHTML = `<span class="err">${esc(m)}</span>`; alert(m); };
+async function load() { D = await (await fetch('/api/data')).json(); render(); const o = (D.settings || {}).folderOwner; if (o && !o.ok && !window.ownWarned) { window.ownWarned = 1; alert('Warning: the storage folder (' + D.settings.folder + ') belongs to another copy of this app:\n' + o.owner + '\n\nThis copy will NOT write or delete any files there, so nothing is overwritten. If this is a copy you only wanted to try, set a different storage folder under Settings. If you moved the project, open Settings and press Save settings to take the folder over.'); } }
+async function rebuildFiles() { if (!confirm('Rewrite the Excel files of every voucher and bill from this app\'s data? Files with the same names in the storage folder are replaced.')) return;
+  const j = await post('/api/rebuild-files', {missing: $('#rbm').checked}); if (!j) return; await load();
+  alert(j.vouchers + ' voucher file(s) and ' + j.bills + ' bill file(s) rebuilt.' + (j.orphanCount ? '\n\n' + j.orphanCount + ' file(s) in the folder do not belong to any voucher here (maybe made by another copy). They were left alone:\n' + j.orphans.slice(0, 25).join(', ') + (j.orphanCount > 25 ? ', …' : '') : '')); }
+function render() {
+  $('#nav').innerHTML = NAV.map(([g, ks]) => `<div class="ng">${g}</div>` + ks.map(k => `<button class="${k==tab?'on':''}" title="${TABS[k]}" aria-label="${TABS[k]}"${k==tab?' aria-current="page"':''} onclick="tab='${k}';window.eb=window.ev=window.er=window.rnew=window.pye=window.pyn=window.sle=window.sls=window.slp=window.bm=window.bke=null;render()">${IC[k]}<span>${TABS[k]}</span></button>`).join('')).join('');
+  $('#pgt').textContent = TABS[tab]; $('#pgs').textContent = TSUB[tab] || ''; document.title = TABS[tab] + ' – Lekha'; { const co = D.settings.company; $('#co').textContent = co.name || ''; $('#cov').textContent = co.vat ? 'PAN/VAT ' + co.vat : ''; } $('#period').classList.toggle('off', NOPERIOD.includes(tab));
+  $('#al').innerHTML = D.accounts.map(a => `<option value="${a.code} ${esc(a.name)}">`).join('');
+  const pl = t => D.db.parties.filter(p => p.type != t).map(p => `<option value="${esc(p.name)}">`).join(''); $('#pls').innerHTML = pl('customer'); $('#plc').innerHTML = pl('supplier'); $('#stf').innerHTML = D.db.staff.map(p => `<option value="${esc(p.name)}">`).join('');
+  $('#m').innerHTML = (NOPERIOD.includes(tab) ? '' : hid()) + V[tab]();
+  if (tab == 'voucher') { (window.ev ? window.ev.lines : [null, null]).forEach(l => addLine(l)); calc(); } if (tab == 'bills') { pcalc(); scalc(''); if (!(window.eb && window.eb.kind == 'sales')) fillParty('sc', 'sv'); } if (tab == 'rec') recFilter(); if (tab == 'stmt') loadStmt();
+}
+function addLine(l) {
+  $('#ls').insertAdjacentHTML('beforeend', `<tr><td><input list="al" class="ac" placeholder="Type code or name" value="${l ? esc(nm(l.account)) : ''}" oninput="calc()"></td>
+  <td class="n"><input class="dr" type="number" step="any" style="text-align:right" value="${l && l.dr ? l.dr : ''}" oninput="calc()"></td><td class="n"><input class="cr" type="number" step="any" style="text-align:right" value="${l && l.cr ? l.cr : ''}" oninput="calc()"></td>
+  <td><button class="x" title="Remove line" onclick="this.closest('tr').remove();calc()">×</button></td></tr>`);
+}
+function calc() {
+  let d = 0, c = 0; document.querySelectorAll('#ls tr').forEach(r => { const ac = r.querySelector('.ac'); ac.style.borderColor = ac.value && !resolveAcc(ac.value) ? '#B42318' : ''; d += +r.querySelector('.dr').value || 0; c += +r.querySelector('.cr').value || 0; });
+  $('#tot').innerHTML = `<span>Debit <b>${f(d)}</b></span><span>Credit <b>${f(c)}</b></span>` + (Math.abs(d-c) < .005 && d > 0 ? '<span class="ok"><b>Balanced</b></span>' : !d && !c ? '<span>Enter debit and credit amounts</span>' : `<span class="err"><b>Difference ${f(d-c)}</b></span>`);
+}
+async function save() {
+  if (badAD($('#vd').value)) return;
+  const rows = [...document.querySelectorAll('#ls tr')].map(r => ({t: r.querySelector('.ac').value, dr: r.querySelector('.dr').value, cr: r.querySelector('.cr').value}));
+  const bad = rows.filter(r => (+r.dr || +r.cr) && !resolveAcc(r.t));
+  if (bad.length) return showErr('Account not found: ' + bad.map(r => '"' + (r.t || 'blank') + '"').join(', ') + '. Pick an account from the list while typing, or add it in the Accounts tab.');
+  const lines = rows.map(r => ({account: resolveAcc(r.t), dr: r.dr, cr: r.cr}));
+  const body = {type: $('#vt').value, date: $('#vd').value, bs: $('#vb').value, ref: $('#vr').value, narration: $('#vn').value, lines};
+  const ed = window.ev, r = await fetch('/api/vouchers' + (ed ? '/' + ed.id : ''), {method: ed ? 'PUT' : 'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
+  const j = await r.json(); if (!r.ok) return showErr(j.error);
+  if (ed) { window.ev = null; tab = 'daybook'; await load(); return toast('Updated ' + j.no + (j.saved ? '\nExcel refreshed: ' + j.saved : '')); }
+  await load(); const out = body.date < FR() || body.date > TO(); $('#msg').innerHTML = `<span class="ok">Saved ${j.no}${j.saved ? ' → ' + esc(j.saved) : ''}</span>` + (out ? ' <span class="err">but its date is outside the From/To period at the top, so it will not show in reports until you change that period.</span>' : '');
+}
+async function rm(id, ask) { if (!confirm(ask)) return; window.sp = null; if (window.er && window.er.id == id) window.er = null; if (window.pye && window.pye.id == id) window.pye = null; if (window.ev && window.ev.id == id) window.ev = null; if (window.sle && window.sle.id == id) window.sle = null; if (window.eb && window.eb.voucherId == id) window.eb = null; const r = await fetch('/api/vouchers/' + id, {method: 'DELETE'}), j = await r.json().catch(() => ({})); await load(); toast(j.files && j.files.length ? 'Deleted. Excel file(s) removed:\n' + j.files.join('\n') : 'Deleted.'); }
+const del = id => rm(id, 'Delete this voucher and its Excel file? This cannot be undone.');
+async function addAcc() {
+  const g = i => $('#' + i).value, r = await fetch('/api/accounts', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({code:g('ac1'), name:g('ac2'), type:g('ac3'), group:g('ac4')})});
+  if (!r.ok) return alert((await r.json()).error); load();
+}
+const rows = (list, valFn) => list.map(a => ({a, v: valFn(a)})).filter(x => Math.abs(x.v) > .004);
+const section = (title, list, sign) => { // list of accounts, sign flips Dr-Cr into natural balance
+  let tot = 0, h = `<tr class="sec"><th colspan="2">${title}</th></tr>`;
+  groups(list).forEach(g => { const r = rows(list.filter(a => a.group == g), a => sign * closing(a)); if (!r.length) return;
+    h += (g == title ? '' : `<tr class="grp"><td colspan="2">${esc(g)}</td></tr>`) + r.map(x => `<tr><td class="ind">${x.a.code} ${esc(x.a.name)}</td><td class="n">${f(x.v)}</td></tr>`).join(''); tot += r.reduce((s,x) => s + x.v, 0); });
+  return {h, tot};
+};
+const dl = k => `<div class="tool"><button class="p" onclick="getFile('/api/xlsx/statement/${k}?from=${FR()}&to=${TO()}')">Download Excel</button></div>`;
+const toast = (m, k) => { const t = $('#toast'); t.innerHTML = esc(m) + (k ? '<br><a href="#" style="color:#fff;font-weight:600" onclick="goRec(\'' + k + '\');return false">View in Records →</a>' : ''); t.style.display = 'block'; clearTimeout(window.tt); window.tt = setTimeout(() => t.style.display = 'none', 7000); };
+async function getFile(url) { const r = await fetch(url); if (!r.ok) return alert((await r.json()).error || 'Download failed');
+  const saved = r.headers.get('X-Saved-To'); if (saved) return toast('Saved to ' + decodeURIComponent(saved));
+  const a = document.createElement('a'); a.href = URL.createObjectURL(await r.blob()); a.download = (/filename="([^"]+)"/.exec(r.headers.get('Content-Disposition')) || [])[1] || 'file.xlsx'; a.click();
+  toast("Downloaded by the browser. Set a storage folder (and keep its switch on) in Settings to save elsewhere."); }
+const delBill = (id, kind) => rm(id, 'Delete this ' + kind + ' bill, its voucher and their Excel files? This cannot be undone.');
+async function delAcc(code) { if (!confirm('Delete account ' + code + '?')) return; const r = await fetch('/api/accounts/' + code, {method: 'DELETE'}); if (!r.ok) return alert((await r.json()).error); load(); }
+async function addCat() { const j = await post('/api/categories', {name: F('newcat')}); if (j) load(); }
+async function delCat(i) { if (!confirm('Remove this category from the list? Existing entries keep their accounts.')) return; await fetch('/api/categories/' + encodeURIComponent(D.settings.categories[i]), {method: 'DELETE'}); load(); }
+// ---- Dashboard helpers (plain SVG/HTML, no libraries) ----
+const K = n => { const a = Math.abs(n), s = n < 0 ? '-' : ''; return s + (a >= 1e7 ? (a / 1e7).toFixed(2) + ' Cr' : a >= 1e5 ? (a / 1e5).toFixed(2) + ' L' : a >= 1e3 ? (a / 1e3).toFixed(1) + 'k' : Math.round(a)); };
+const f0 = n => Math.round(n).toLocaleString('en-IN'), PAL = ['#27418F', '#E0A030', '#7A1F33', '#2E8B77', '#6C7BB8', '#C9694B', '#8FB3A6', '#9AA0AE'];
+const hbars = (items, col = 'var(--pine)') => { const mx = Math.max(...items.map(i => Math.abs(i.v)), 1); return items.length ? items.map(i => `<div class="hb" title="${esc(i.l)}: ${f(i.v)}"><span>${esc(i.l)}</span><div><i style="width:${Math.max(Math.abs(i.v) / mx * 100, 1.5)}%;background:${col}"></i></div><b>${K(i.v)}</b>${i.s ? `<small>${esc(i.s)}</small>` : ''}</div>`).join('') : '<p class="sub" style="margin:0">Nothing to show for this period.</p>'; };
+function barChart(labels, series) {
+  const W = 720, H = 250, L = 50, B = 26, T = 10, all = series.flatMap(s => s.vals), mx = Math.max(...all, 1), mn = Math.min(...all, 0), raw = (mx - mn) / 4, p = 10 ** Math.floor(Math.log10(raw)), step = [1, 2, 2.5, 5, 10].map(x => x * p).find(x => x >= raw), top = Math.ceil(mx / step) * step, bot = Math.floor(mn / step) * step;
+  const y = v => T + (top - v) / ((top - bot) || 1) * (H - T - B), gw = (W - L - 8) / labels.length, bw = Math.min(26, gw * .8 / series.length);
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" style="width:100%;height:auto;display:block">`;
+  for (let v = bot; v <= top + 1e-9; v += step) s += `<line x1="${L}" x2="${W - 8}" y1="${y(v)}" y2="${y(v)}" stroke="#E4E2DB"/><text x="${L - 6}" y="${y(v) + 4}" text-anchor="end" font-size="11" fill="#656A77">${K(v)}</text>`;
+  labels.forEach((lb, i) => { const x0 = L + i * gw + (gw - bw * series.length) / 2;
+    series.forEach((se, j) => { const v = se.vals[i]; s += `<rect x="${x0 + j * bw}" y="${Math.min(y(v), y(0))}" width="${bw - 2}" height="${Math.abs(y(v) - y(0))}" rx="2" fill="${v < 0 ? '#B42318' : se.color}"><title>${esc(lb)} · ${esc(se.name)}: ${f(v)}</title></rect>`; });
+    s += `<text x="${L + i * gw + gw / 2}" y="${H - 8}" text-anchor="middle" font-size="11" fill="#656A77">${esc(lb)}</text>`; });
+  return s + '</svg>' + (series.length > 1 ? `<div class="lg">${series.map(x => `<span><i style="background:${x.color}"></i>${esc(x.name)}</span>`).join('')}</div>` : ''); }
+function donut(items) { const tot = items.reduce((s, i) => s + i.v, 0); if (!tot) return '<p class="sub" style="margin:0">Nothing to show for this period.</p>'; let off = 25;
+  const arcs = items.map((i, k) => { const q = i.v / tot * 100, a = `<circle r="15.915" cx="21" cy="21" fill="none" stroke="${PAL[k % PAL.length]}" stroke-width="7" stroke-dasharray="${q} ${100 - q}" stroke-dashoffset="${off}"><title>${esc(i.l)}: ${f(i.v)} (${q.toFixed(1)}%)</title></circle>`; off -= q; return a; }).join('');
+  return `<div class="dn"><svg viewBox="0 0 42 42" width="170" height="170" role="img">${arcs}<text x="21" y="22.5" text-anchor="middle" font-size="4.2" font-weight="600" fill="#1E2230">${K(tot)}</text></svg><div>${items.map((i, k) => `<div class="lgi"><i style="background:${PAL[k % PAL.length]}"></i>${esc(i.l)}<b>${(i.v / tot * 100).toFixed(0)}%</b></div>`).join('')}</div></div>`; }
+// ---- Records page ----
+function recFilter() { const g = id => { const e = document.getElementById(id); return e ? e.value : ''; }, q = g('rq').trim().toLowerCase().split(/\s+/).filter(Boolean), c = g('rfc'), a = g('rfa'), p = g('rfp'), m = g('rfm'), d1 = g('rd1'), d2 = g('rd2'); let n = 0, all = 0, tot = 0;
+  document.querySelectorAll('#rbody tr[data-q]').forEach(r => { all++; const x = r.dataset, ok = q.every(w => x.q.includes(w)) && (!c || x.c == c) && (!a || x.a == a) && (!p || x.p == p) && (!m || x.m == m) && (!d1 || x.d >= d1) && (!d2 || x.d <= d2); r.hidden = !ok; if (ok) { n++; tot += +x.amt; } });
+  const el = $('#rcount'); if (el) el.textContent = `Showing ${n} of ${all} · total ${f(tot)}`; }
+function goRec(k) { tab = 'rec'; window.rt = k; window.eb = null; render(); scrollTo(0, 0); }
+function pickPurchase(id) { if (id) makeSale(id); else { window.sp = null; render(); } }
+// ---- Salary payment page ----
+function lmode() { $('#lfw').hidden = $('#lmo').value != 'Fonepay'; const want = {Cash: ['cash'], Cheque: ['bank'], Fonepay: ['fonepay', 'bank'], 'Bank transfer': ['bank']}[$('#lmo').value] || []; for (const w of want) { const a = cashAccs().find(x => x.name.toLowerCase().includes(w)); if (a) { $('#lac').value = a.code; break; } } chqPick('lin', 'lac', 'lmo'); }
+async function saveSalary() { if (!chqOk('lin', 'lac', 'lmo')) return; const er = window.sle, body = {staff: F('lnm'), period: F('lpr'), date: F('ldt'), bs: F('lbs'), amount: N('lam'), mode: F('lmo'), account: F('lac'), instrument: F('lin'), note: F('lnt'), debitAccount: F('lde'), fee: N('lfe')};
+  const j = await post(er ? '/api/salaries/' + er.id : '/api/salaries', body, er ? 'PUT' : 'POST'); if (!j) return; window.sle = null; window.slp = null; window.sls = null; await load();
+  toast('Salary ' + j.no + (er ? ' updated' : ' recorded for ' + body.staff) + (j.saved ? '\nSaved to ' + j.saved : ''), 'salary'); }
+function pickStaff(i) { window.sle = null; window.sls = D.db.staff[i].name; window.slp = {staff: D.db.staff[i].name}; render(); }
+async function saveStaff() { const j = await post('/api/db/staff', {name: F('ldn'), designation: F('ldg'), phone: F('lph')}); if (j) { window.sls = j.name; await load(); toast('Staff saved'); } }
+async function delStaff(i) { if (!confirm('Remove this person from the staff list? Their past salary payments stay in the books.')) return; await fetch('/api/db/staff/' + encodeURIComponent(D.db.staff[i].name), {method: 'DELETE'}); window.sls = null; load(); }
+async function migrateOld() { const p = await (await fetch('/api/migrate')).json(); if (!p.salaries.length && !p.files) return toast('Nothing to update. No old salary payments or payment voucher files need converting.');
+  if (!confirm((p.salaries.length ? p.salaries.length + ' payment(s) will become salary payments:\n\n' + p.salaries.map(x => x.date + '  ' + x.payee + '  ' + f(x.amount)).join('\n') : '') + (p.files ? '\n\n' + p.files + ' payment voucher Excel file(s) will be moved from the PV folder to the PMV folder.' : '') + '\n\nA backup of data.json and db.json is made first. Continue?')) return;
+  const j = await (await fetch('/api/migrate', {method: 'POST'})).json(); await load(); toast(j.converted + ' payment(s) converted, ' + j.moved + ' file(s) moved to PMV. Backup files end with .bak-' + j.backup); }
+
+// ---- Bank accounts and cheque number formats ----
+// Same rule as server.js: a cheque number fits a bank when one run of digits in it matches the format (7895xxxx: x = any digit; digits only = "starts with").
+const fmtParts = f => String(f || '').split(/[,;]+/).map(x => x.toLowerCase().replace(/[\s-]/g, '').replace(/[#*?]/g, 'x')).filter(Boolean).map(s => ({s, pre: !s.includes('x')}));
+const fmtHit = (p, run) => p.pre ? run.startsWith(p.s) : run.length === p.s.length && [...p.s].every((c, i) => c === 'x' || c === run[i]);
+const banksFor = instr => { const runs = String(instr || '').match(/\d+/g) || []; return (D.db.banks || []).filter(b => acc(b.ledger) && fmtParts(b.chequeFormat).some(p => runs.some(r => fmtHit(p, r)))); };
+function chqPick(inId, accId, modeId) { if (F(modeId) != 'Cheque') return; const h = banksFor(F(inId)), s = $('#' + accId); if (h.length == 1 && s.querySelector(`option[value="${h[0].ledger}"]`)) s.value = h[0].ledger; }
+function chqOk(inId, accId, modeId) { if (F(modeId) != 'Cheque') return true; const h = banksFor(F(inId)); if (h.length != 1 || h[0].ledger == F(accId)) return true;
+  return confirm(`Cheque no. ${F(inId)} fits the format of ${h[0].name} (${h[0].chequeFormat}), but "${(acc(F(accId)) || {}).name || 'another account'}" is chosen under Paid from.\n\nSave anyway?`); }
+const payFromName = p => p.splits ? [...new Set(p.splits.map(y => (acc(y.account) || {}).name || y.account))].join(' + ') : (acc(p.account) || {}).name || ''; // a split payment (several cheques / banks) lists every bank
+const paidFrom = vid => { const v = D.vouchers.find(y => y.id == vid), p = v && (v.pmt || v.sal), a = p && payFromName(p); return a ? `<br><small>Paid from ${esc(a)}</small>` : ''; };
+function bankCard() { const B = D.db.banks || [], e = B.find(b => b.ledger == window.bke), bkey = window.bke || ''; if (!window.bkfs || window.bkfsFor !== bkey) { window.bkfs = e ? fmtParts(e.chequeFormat).map(p => p.s) : []; window.bkfsFor = bkey; }
+  const free = D.accounts.filter(a => a.type == 'A' && (/bank/i.test(a.name) || a.group == 'Bank Accounts') && !B.some(b => b.ledger == a.code));
+  return `<div class="card" id="bkcard"><div class="ch"><h2>Bank accounts</h2><span class="sub" style="margin:0">Pick one under “Paid from” on Payments made and Salary payment</span></div>
+    <div class="row"><label>Bank name<input id="bkn" value="${esc(e ? e.bank : '')}" placeholder="e.g. Nabil Bank"></label><label>Account no.<input id="bka" value="${esc(e ? e.account : '')}"></label>
+      <div class="fld w2"><span>Cheque no. formats <small>(one for each cheque book)</small></span><div id="bkfc" style="display:flex;gap:6px;flex-wrap:wrap;min-height:26px;align-items:center">${bkfChips()}</div>
+        <div style="display:flex;gap:8px"><input id="bkf" placeholder="e.g. 7895xxxx, then Enter" onkeydown="bkfKey(event)" onblur="bkfAdd(true)"><button type="button" style="white-space:nowrap" onclick="bkfAdd()">Add format</button></div></div>
+      ${!e && free.length ? `<label>Ledger account<select id="bkl"><option value="">Create a new one</option>${free.map(a => `<option value="${a.code}">Use existing: ${esc(a.name)}</option>`).join('')}</select></label>` : ''}
+      <div><button class="p" onclick="saveBank()">${e ? 'Update bank account' : 'Add bank account'}</button>${e ? ' <button onclick="window.bke=null;window.bkfs=null;render()">Cancel</button>' : ''}</div></div>
+    <p class="sub" style="margin:4px 0 14px"><small>Cheque no. format: type the digits that are the same on every cheque of that bank and <b>x</b> for the digits that change, e.g. <b>7895xxxx</b>. A bank can have <b>several formats</b>, one for each cheque book: type one and press Enter (or Add format), then add the next, e.g. 7895xxxx and 4410xxxx; typing digits only (7895) means “starts with 7895”. It is used to pick the bank when you type a cheque number, and to update old records below. Each bank account gets its own ledger account, so it shows in the ledger, trial balance and balance sheet.</small></p>
+    <div class="tw"><table><thead><tr><th>Bank</th><th>Account no.</th><th>Cheque no. formats</th><th>Ledger account</th><th></th></tr></thead><tbody>${B.map(b => `<tr><td><b>${esc(b.bank)}</b></td><td>${esc(b.account)}</td><td>${fmtParts(b.chequeFormat).map(p => `<span class="chip" style="margin:0 4px 4px 0" title="${esc(fmtHint(p.s))}">${esc(p.s)}</span>`).join('') || '—'}</td><td>${esc((acc(b.ledger) || {}).name || '')}<br><small>${esc(b.ledger)}</small></td><td class="act"><button onclick="editBank('${b.ledger}')">Edit</button> <button class="d" onclick="delBank('${b.ledger}')">Remove</button></td></tr>`).join('') || '<tr><td class="empty" colspan="5">No bank accounts yet.</td></tr>'}</tbody></table></div></div>`; }
+async function saveBank() { if (!bkfAdd()) return; const e = window.bke, j = await post('/api/banks' + (e ? '/' + e : ''), {bank: F('bkn'), account: F('bka'), chequeFormat: window.bkfs.join(', '), ledger: e || !$('#bkl') ? '' : F('bkl')}, e ? 'PUT' : 'POST'); if (!j) return; window.bke = null; window.bkfs = null; await load(); toast('Bank account ' + (e ? 'updated' : 'added') + ': ' + j.name); }
+function editBank(code) { window.bke = code; window.bkfs = null; render(); $('#bkcard').scrollIntoView({block: 'start'}); $('#bkn').focus(); }
+async function delBank(code) { if (!confirm('Remove this bank account from the list? Payments already made from it keep their ledger account.')) return; const r = await fetch('/api/banks/' + encodeURIComponent(code), {method: 'DELETE'}), j = await r.json(); if (!r.ok) return alert(j.error); if (window.bke == code) { window.bke = null; window.bkfs = null; } await load(); toast(j.kept ? 'Removed from the list. Its ledger account is kept because it has entries.' : 'Bank account removed.'); }
+async function bankScan() { const r = await fetch('/api/bank-match'); window.bm = await r.json(); render(); $('#bmcard').scrollIntoView({block: 'start'}); }
+async function bankApply() { if (!confirm(window.bm.change.length + ' cheque payment(s) will be moved to the bank account their cheque number belongs to. Amounts and dates stay the same; only the “paid from” account changes.\n\nA backup of data.json is made first. Continue?')) return;
+  const j = await post('/api/bank-match', {}); if (!j) return; window.bm = null; await load(); toast(j.moved + ' payment(s) moved to their bank account' + (j.files ? ', ' + j.files + ' voucher Excel file(s) refreshed' : '') + (j.skipped ? '. ' + j.skipped + ' skipped (no bank line found)' : '') + (j.backup ? '. Backup: data.json.bak-' + j.backup : '')); }
+function bankMatchCard() { const m = window.bm, rows = (L, cols) => `<div class="tw"><table><thead><tr><th>Date</th><th>Voucher</th><th>Paid to</th><th>Cheque no.</th><th class="n">Amount</th>${cols.map(c => `<th>${c[0]}</th>`).join('')}</tr></thead><tbody>${L.map(r => `<tr><td>${r.date}${r.bs ? '<br><small>' + esc(r.bs) + '</small>' : ''}</td><td><b>${r.no}</b></td><td>${esc(r.who)}</td><td>${esc(r.cheque) || '—'}</td><td class="n">${f(r.amount)}</td>${cols.map(c => `<td>${c[1](r)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+  const more = (L, t, cols) => L.length ? `<details style="margin:10px 0 0"><summary style="cursor:pointer;font-weight:600;font-size:13px">${L.length} ${t}</summary>${rows(L, cols)}</details>` : '';
+  const body = !m ? '' : !m.banks ? '<p class="sub" style="margin:12px 0 0">Add a cheque no. format to at least one bank account above first.</p>' : `<div style="margin-top:14px">
+    <p class="sub" style="margin:0 0 10px"><b>${m.change.length}</b> cheque payment(s) will move to the bank their cheque number belongs to. <b>${m.check.length}</b> need your check and <b>${m.none.length}</b> have no matching bank; those are left as they are.</p>
+    ${m.change.length ? rows(m.change, [['Now', r => esc(r.from)], ['Will be', r => '<b>' + esc(r.to) + '</b>']]) : '<p class="sub" style="margin:0">Nothing to move: every cheque that fits a bank format is already on that bank.</p>'}
+    ${more(m.check, 'to check', [['Paid from', r => esc(r.from)], ['Why', r => esc(r.note)]])}${more(m.none, 'with no matching bank', [['Paid from', r => esc(r.from)], ['Why', r => esc(r.note)]])}
+    <div class="actbar">${m.change.length ? `<button class="p" onclick="bankApply()">Move ${m.change.length} payment(s)</button>` : ''}<button onclick="window.bm=null;render()">Close</button></div></div>`;
+  return `<div class="card" id="bmcard"><div class="ch"><h2>Match old cheque payments to banks</h2></div><p class="sub" style="margin:0 0 10px">Looks at every old payment made and salary payment paid by cheque and, using the cheque no. formats above, works out which bank account it came from. You see the list first; nothing changes until you press Move. Ledgers, trial balance and the voucher Excel files are updated, and a backup of data.json is made first. Run it again any time, for example after adding another bank.</p><button onclick="bankScan()">Check old cheque payments</button>${body}</div>`; }
+
+// ---- One payment by several cheques / banks (Payments made). The first cheque uses the normal Paid from + Cheque no. fields; each extra cheque is a row here. ----
+const spRow = (ca, m = {}) => `<div class="row" data-sp style="margin-top:8px;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) minmax(0,1fr) auto"><label>Paid from<select data-f="account">${ca.map(a => `<option value="${a.code}" ${a.code == m.account ? 'selected' : ''}>${esc(a.name)}</option>`).join('')}</select></label>
+  <label>Cheque no.<input data-f="instrument" value="${esc(m.instrument || '')}" oninput="spPick(this)"></label><label>Amount<input data-f="amount" type="number" step="any" value="${m.amount ?? ''}" oninput="spSum()"></label>
+  <div><button type="button" class="x" title="Remove this cheque" onclick="this.closest('[data-sp]').remove();spSum()">×</button></div></div>`;
+const splitBox = pre => `<div id="ysw" ${pre.mode == 'Cheque' ? '' : 'hidden'} style="margin-top:6px"><div id="ysp">${(pre.more || []).map(m => spRow(cashAccs(), m)).join('')}</div>
+  <div class="actbar" style="margin:8px 0 0"><button type="button" onclick="spAdd()">+ Part paid by another cheque / bank</button><span id="ysum" class="sub" style="margin:0">${spText(+pre.amount || 0, (pre.more || []).reduce((t, m) => t + (+m.amount || 0), 0), (pre.more || []).length)}</span></div></div>`;
+function spAdd() { const ca = cashAccs(), other = ca.find(a => /bank/i.test(a.name) && a.code != F('yac')) || ca[0]; $('#ysp').insertAdjacentHTML('beforeend', spRow(ca, {account: other && other.code})); spSum(); $('#ysp').lastElementChild.querySelector('[data-f=instrument]').focus(); }
+function spPick(el) { const h = banksFor(el.value), s = el.closest('[data-sp]').querySelector('[data-f=account]'); if (h.length == 1 && s.querySelector(`option[value="${h[0].ledger}"]`)) s.value = h[0].ledger; }
+const spText = (total, ex, n) => { const first = rd(total - ex); return n ? (first > 0 ? `First cheque: <b>${f(first)}</b> · other cheques: <b>${f(ex)}</b>` : '<b style="color:var(--err)">The other cheques are as much as the whole payment</b>') : 'Use this when one payment is made with more than one cheque, or from more than one bank.'; };
+function spSum() { const o = $('#ysum'); if (!o) return; const rows = [...document.querySelectorAll('#ysp [data-sp]')]; o.innerHTML = spText(N('yam'), rows.reduce((t, r) => t + (+r.querySelector('[data-f=amount]').value || 0), 0), rows.length); }
+function spRows() { if (!$('#ysp') || F('ymo') != 'Cheque') return []; const out = [];
+  for (const r of document.querySelectorAll('#ysp [data-sp]')) { const g = k => r.querySelector('[data-f=' + k + ']').value, amount = +g('amount') || 0, instrument = g('instrument').trim(); if (!amount && !instrument) continue; // empty row: ignored
+    if (amount <= 0) { alert('Enter an amount for every extra cheque, or remove the empty one.'); return null; }
+    const h = banksFor(instrument); if (h.length == 1 && h[0].ledger != g('account') && !confirm(`Cheque no. ${instrument} fits the format of ${h[0].name} (${h[0].chequeFormat}), but "${(acc(g('account')) || {}).name || 'another account'}" is chosen under Paid from.\n\nSave anyway?`)) return null;
+    out.push({account: g('account'), instrument, amount}); }
+  if (out.length && rd(N('yam') - out.reduce((t, x) => t + x.amount, 0)) <= 0) { alert('The extra cheques add up to the whole payment or more. Nothing is left for the first cheque.'); return null; }
+  return out; }
+
+// ---- Several cheque number formats for one bank (chips) ----
+const fmtHint = s => s.includes('x') ? `Any ${s.length}-digit cheque number that matches ${s} (x = any digit)` : `Any cheque number starting with ${s}`;
+const bkfChips = () => (window.bkfs || []).map((s, i) => `<span class="chip" title="${esc(fmtHint(s))}">${esc(s)} <a href="#" title="Remove this format" onclick="bkfDel(${i});return false">×</a></span>`).join(' ') || '<small>No format yet</small>';
+function bkfAdd(silent) { const el = $('#bkf'); if (!el) return true; const parts = fmtParts(el.value); if (!parts.length) return true;
+  if (parts.some(p => !/^[0-9x]+$/.test(p.s) || !/\d/.test(p.s))) { if (!silent) alert('A cheque number format can only contain digits and x, for example 7895xxxx'); return false; }
+  parts.forEach(p => { if (!window.bkfs.includes(p.s)) window.bkfs.push(p.s); }); el.value = ''; $('#bkfc').innerHTML = bkfChips(); return true; }
+function bkfDel(i) { window.bkfs.splice(i, 1); $('#bkfc').innerHTML = bkfChips(); }
+function bkfKey(e) { if (e.key == 'Enter' || e.key == ',') { e.preventDefault(); bkfAdd(); } }
+
+// ---- Old payments with several cheque numbers from different banks in one voucher: type each cheque's amount, then split ----
+async function splitScanUI() { window.bsp = await (await fetch('/api/bank-split')).json(); render(); $('#bspcard').scrollIntoView({block: 'start'}); }
+function splitSum(id) { const r = window.bsp.rows.find(x => x.id == id), ins = [...document.querySelectorAll(`[data-sv="${id}"]`)], sum = rd(ins.reduce((t, i) => t + (+i.value || 0), 0)), o = $('#bsr' + id);
+  o.innerHTML = !sum ? '<small>Type each cheque’s amount</small>' : Math.abs(sum - r.total) < .005 ? '<span class="chip ok">Adds up</span>' : `<small style="color:var(--err)">${f(sum)} entered · ${f(r.total - sum)} ${sum > r.total ? 'too much' : 'to go'}</small>`; }
+function splitType(el, id) { const r = window.bsp.rows.find(x => x.id == id), ins = [...document.querySelectorAll(`[data-sv="${id}"]`)]; el.dataset.auto = '';
+  if (ins.length == 2) { const o = ins.find(i => i !== el); if (!o.value || o.dataset.auto) { const v = rd(r.total - (+el.value || 0)); o.value = el.value && v > 0 ? v : ''; o.dataset.auto = '1'; } } // two cheques: the second is filled in with what is left
+  splitSum(id); }
+async function bankSplitApply() { const items = [];
+  for (const r of window.bsp.rows) { const vals = [...document.querySelectorAll(`[data-sv="${r.id}"]`)].map(i => ({cheque: i.dataset.ch, amount: +i.value || 0})); if (!vals.some(v => v.amount)) continue;
+    if (vals.some(v => v.amount <= 0)) return alert(`Enter an amount for every cheque of ${r.no}, or clear them all to leave it for later.`);
+    const sum = rd(vals.reduce((t, v) => t + v.amount, 0)); if (Math.abs(sum - r.total) > .004) return alert(`${r.no}: the cheques add up to ${f(sum)} but the payment is ${f(r.total)}.`);
+    items.push({id: r.id, parts: vals}); }
+  if (!items.length) return alert('Type the amount of each cheque first. Payments left empty stay as they are.');
+  if (!confirm(items.length + ' payment(s) will be split so each cheque is booked to its own bank account. The supplier, total amount and date stay the same; only the “paid from” side is divided.\n\nA backup of data.json is made first. Continue?')) return;
+  const j = await post('/api/bank-split', {items}); if (!j) return; window.bsp = null; await load(); toast(j.split + ' payment(s) split by bank' + (j.files ? ', ' + j.files + ' voucher Excel file(s) refreshed' : '') + '. Backup: data.json.bak-' + j.backup); }
+function bankSplitCard() { const m = window.bsp,
+    amt = (r, p) => `<div style="margin:0 0 8px"><b>${esc(p.cheque)}</b> <small>· ${esc(p.bank)}</small><br><input type="number" step="any" placeholder="Amount" style="width:150px;margin-top:3px" data-sv="${r.id}" data-ch="${esc(p.cheque)}" oninput="splitType(this,${r.id})"></div>`,
+    who = r => `<td>${r.date}${r.bs ? '<br><small>' + esc(r.bs) + '</small>' : ''}</td><td><b>${r.no}</b></td><td>${esc(r.who)}<br><small>Cheque field: ${esc(r.ref)}</small></td>`,
+    body = !m ? '' : m.error ? `<p class="sub" style="margin:12px 0 0;color:var(--err)">The server did not understand this request (${esc(m.error)}). It is probably still running the old server.js: replace it with the new server.js, stop the server and start it again with <b>node server.js</b>, then press Check old payments.</p>` : m.banks < 2 ? '<p class="sub" style="margin:12px 0 0">Add a cheque no. format to at least two bank accounts above first.</p>' : `<div style="margin-top:14px">
+      <p class="sub" style="margin:0 0 10px"><b>${m.rows.length}</b> payment(s) can be split. ${m.check.length ? `<b>${m.check.length}</b> need a look by hand.` : ''}</p>
+      ${m.rows.length ? `<div class="tw"><table><thead><tr><th>Date</th><th>Voucher</th><th>Paid to</th><th>Now paid from</th><th class="n">Payment</th><th>Cheques and their amounts</th><th></th></tr></thead><tbody>${m.rows.map(r => `<tr>${who(r)}<td>${esc(r.from)}</td><td class="n">${f(r.total)}</td><td>${r.parts.map(p => amt(r, p)).join('')}</td><td id="bsr${r.id}"><small>Type each cheque’s amount</small></td></tr>`).join('')}</tbody></table></div>` : '<p class="sub" style="margin:0">No old payment has cheque numbers from different banks in one voucher.</p>'}
+      ${m.check.length ? `<details style="margin:10px 0 0"><summary style="cursor:pointer;font-weight:600;font-size:13px">${m.check.length} to check by hand</summary><div class="tw"><table><thead><tr><th>Date</th><th>Voucher</th><th>Paid to</th><th class="n">Payment</th><th>Why</th></tr></thead><tbody>${m.check.map(r => `<tr>${who(r)}<td class="n">${f(r.total)}</td><td>${esc(r.note)}</td></tr>`).join('')}</tbody></table></div></details>` : ''}
+      <div class="actbar">${m.rows.length ? '<button class="p" onclick="bankSplitApply()">Split the payments I filled in</button>' : ''}<button onclick="window.bsp=null;render()">Close</button></div></div>`;
+  return `<div class="card" id="bspcard"><div class="ch"><h2>Split old payments made with several cheques</h2></div><p class="sub" style="margin:0 0 10px">Finds old payments where one voucher lists cheque numbers from <b>different banks</b> (for example “7895001, 4410002”). Each cheque is matched to its bank by the formats above; you type the amount of each cheque, and the payment is split so every bank’s ledger shows its own cheque. The supplier, total, date and bill stay the same. Payments you leave empty are not touched, and a backup of data.json is made first.</p><button onclick="splitScanUI()">Check old payments</button>${body}</div>`; }
+
+// ---- Statements page ----
+const SK = [['supplier', 'Suppliers'], ['customer', 'Customers'], ['staff', 'Staff'], ['expense', 'Expenses']];
+function stmtList(k) { const key = x => String(x || '').trim().toLowerCase();
+  if (k == 'supplier') return D.payables.map(x => ({n: x.name, s: f(x.balance), t: 'we owe', sub: x.pan}));
+  if (k == 'customer') return D.receivables.map(x => ({n: x.name, s: f(x.balance), t: 'they owe', sub: x.pan}));
+  if (k == 'staff') return D.db.staff.slice().sort((a, b) => a.name.localeCompare(b.name)).map(x => ({n: x.name, s: f(D.vouchers.filter(v => v.sal && key(v.sal.staff) == key(x.name)).reduce((t, v) => t + v.sal.amount, 0)), t: 'paid', sub: x.designation}));
+  return D.accounts.filter(a => a.type == 'X').map(a => ({n: a.name, s: f(net(a.code, cum)), t: 'to date', sub: a.group})); }
+function stmtDates() { return {from: window.stf || FR(), to: window.stt || TO()}; }
+function pickStmt(i) { window.stn = window.stl[i].n; render(); }
+function sqFilter() { const q = $('#sq').value.trim().toLowerCase().split(/\s+/).filter(Boolean); let vis = [];
+  document.querySelectorAll('#smbody tr[data-q]').forEach(r => { const ok = q.every(w => r.dataset.q.includes(w)); r.hidden = !ok; if (ok) vis.push(r); });
+  if (q.length && vis.length == 1 && window.stl[+vis[0].dataset.i].n != window.stn) { const v = $('#sq').value; window.stn = window.stl[+vis[0].dataset.i].n; render(); const e = $('#sq'); e.value = v; e.focus(); e.setSelectionRange(v.length, v.length); sqFilter(); } } // exactly one match: show its statement
+function setStmtDates() { window.stf = F('sdf'); window.stt = F('sdt'); render(); }
+function stmtUrl(x) { const d = stmtDates(); return `/api/${x}pstatement/${window.stk || 'supplier'}?name=${encodeURIComponent(window.stn)}&from=${d.from}&to=${d.to}`; }
+async function loadStmt() { const box = $('#smain'); if (!box || !window.stn) return; const want = window.stn + '|' + stmtDates().from + '|' + stmtDates().to, r = await fetch(stmtUrl('')); if (!$('#smain') || want != window.stn + '|' + stmtDates().from + '|' + stmtDates().to) return;
+  const S = await r.json(); if (!r.ok) { box.innerHTML = '<p class="sub">' + esc(S.error) + '</p>'; return; }
+  box.innerHTML = `<div class="vat" style="margin:0 0 12px"><div><span>Opening balance</span><b>${f(S.opening)}</b></div><div><span>${esc(S.cols.a)}</span><b>${f(S.a)}</b></div><div><span>${esc(S.cols.b)}</span><b>${f(S.b)}</b></div><div class="net"><span>Closing balance</span><b>${f(S.closing)}</b></div></div>
+  <div class="tw"><table><thead><tr><th>Date</th><th>Voucher</th><th>Particulars</th><th class="n">${esc(S.cols.a)}</th><th class="n">${esc(S.cols.b)}</th><th class="n">${esc(S.cols.bal)}</th></tr></thead><tbody>
+  <tr><td></td><td></td><td><i>Opening balance</i></td><td></td><td></td><td class="n">${f(S.opening)}</td></tr>${S.rows.map(e => `<tr><td>${e.date}${e.bs ? '<br><small>' + esc(e.bs) + '</small>' : ''}</td><td><b>${esc(e.no)}</b>${e.ref ? '<br><small>' + esc(e.ref) + '</small>' : ''}</td><td>${esc(e.text)}</td><td class="n">${e.a ? f(e.a) : ''}</td><td class="n">${e.b ? f(e.b) : ''}</td><td class="n">${f(e.bal)}</td></tr>`).join('') || '<tr><td class="empty" colspan="6">No entries in this period.</td></tr>'}</tbody></table></div>`; }
+function fonepayCard() { const L = D.vouchers.filter(v => (v.pmt || v.sal) && (v.pmt || v.sal).mode == 'Fonepay' && (v.pmt || v.sal).fee === undefined).sort((a, b) => a.date.localeCompare(b.date) || a.id - b.id);
+  return `<div class="card"><div class="ch"><h2>Fonepay charges to update</h2><button class="sp" onclick="getFile('/api/xlsx/fonepay')">Download list (Excel)</button></div><p class="sub" style="margin:0 0 10px">Payments made and salary payments paid by Fonepay before the charge field existed. Type the charge you paid (0 if there was none) and press Save. The payment is re-posted in the ledgers, day book and income statement, and the row leaves this list.</p>
+  <div class="tw"><table><thead><tr><th>Date</th><th>Voucher</th><th>Paid to</th><th class="n">Amount</th><th style="width:150px">Fonepay charge</th><th></th></tr></thead><tbody>${L.map(v => { const p = v.pmt || v.sal; return `<tr><td>${v.date}${v.bs ? '<br><small>' + esc(v.bs) + '</small>' : ''}</td><td><b>${v.no}</b>${v.sal ? '<br><small>Salary</small>' : ''}</td><td>${esc(v.sal ? p.staff : p.other ? p.payee : p.supplier)}${p.instrument ? '<br><small>' + esc(p.instrument) + '</small>' : ''}</td><td class="n">${f(p.amount)}</td><td><input id="ff${v.id}" type="number" step="any" placeholder="0.00" onkeydown="if(event.key=='Enter')saveFee(${v.id})"></td><td class="act"><button class="p" onclick="saveFee(${v.id})">Save</button> <button onclick="editV(${v.id})">Edit</button></td></tr>`; }).join('') || '<tr><td class="empty" colspan="6">No Fonepay payments need updating.</td></tr>'}</tbody></table></div></div>`; }
+async function saveFee(id) { const el = $('#ff' + id), v = D.vouchers.find(x => x.id == id); if (el.value === '') return alert('Enter the Fonepay charge (0 if there was none).'); const r = await fetch('/api/' + (v.sal ? 'salaries/' : 'payments/') + id + '/fee', {method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({fee: +el.value})}), j = await r.json(); if (!r.ok) return alert(j.error); await load(); toast('Fonepay charge saved for ' + j.no); }
+const F = id => $('#' + id).value, N = id => +F(id) || 0, rd = n => Math.round(n * 100) / 100;
+async function post(url, body, method = 'POST') { if (badAD(body.date)) return null; const r = await fetch(url, {method, headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)}); const j = await r.json(); if (!r.ok) { alert(j.error); return null; } return j; }
+function pcalc() { if (document.activeElement.id == 'pt') $('#pv').value = rd(N('pt') * .13);
+  $('#pnv').textContent = f(N('pn')); $('#ptv').textContent = f(N('pt')); $('#pvv').textContent = f(N('pv')); $('#ptot').textContent = f(rd(N('pn') + N('pt') + N('pv'))); }
+function scalc(src) { if (src != 'st' && N('sb') > 0) $('#st').value = rd(N('sb') * (1 + N('sm') / 100));
+  const t = N('st'), n = N('sn'), g = t - n, tx = rd(g / 1.13), vat = rd(g - tx);
+  $('#sbd').innerHTML = t > 0 && t >= n ? `<dl><dt>Non-taxable</dt><dd>${f(n)}</dd><dt>Taxable</dt><dd>${f(tx)}</dd><dt>VAT 13%</dt><dd>${f(vat)}</dd></dl><div class="tt"><span>Bill total</span><b>${f(t)}</b></div>` : '<p class="err">Enter a bill total that is not less than the non-taxable amount</p><div class="tt"><span>Bill total</span><b>' + f(t) + '</b></div>'; }
+function fillParty(nid, pid) { const p = D.db.parties.find(x => x.name.toLowerCase() == F(nid).trim().toLowerCase()); if (p && p.pan) $('#' + pid).value = p.pan; }
+async function saveParty() { const j = await post('/api/db/parties', {name: F('dn'), type: F('dt'), pan: F('dp'), address: F('da'), phone: F('dph'), email: F('de')}); if (j) load(); }
+const editParty = i => { const p = D.db.parties[i]; ['dn:name', 'dt:type', 'dp:pan', 'da:address', 'dph:phone', 'de:email'].forEach(x => { const [id, k] = x.split(':'); $('#' + id).value = p[k] || ''; }); scrollTo(0, 0); };
+async function delParty(i) { if (confirm('Remove this party from the database? Ledgers and bills are not affected.')) { await fetch('/api/db/parties/' + encodeURIComponent(D.db.parties[i].name), {method: 'DELETE'}); load(); } }
+async function saveSettings() { const own = (D.settings || {}).folderOwner, same = own && !own.ok && F('sf') == D.settings.folder; // the folder is marked as belonging to another copy of the app
+  if (same && !confirm('This storage folder is marked as used by another copy of the app:\n' + own.owner + '\n\nTake it over for THIS copy? Only do this if the other copy is no longer used (for example you moved the project folder). Otherwise press Cancel and choose a different folder.')) return;
+  const j = await post('/api/settings', {takeOver: !!same, folder: F('sf'), auto: {jv: $('#aj').checked, pv: $('#av').checked, pmv: $('#apm').checked, stm: $('#ast').checked, sv: $('#as').checked, rv: $('#arv').checked, registers: $('#ar').checked, tb: $('#at').checked, pl: $('#ap').checked, bs: $('#ab').checked}, company: {name: F('cn'), vat: F('cv'), addr: F('ca'), tel: F('ct'), email: F('ce')}}); if (j) { await load(); toast('Settings saved' + (j.folder ? '. Folders ready in ' + j.folder : '. No storage folder set, so nothing will be auto-saved.')); } }
+async function savePurchase() { const ed = window.eb && window.eb.kind == 'purchase', body = {supplier: F('ps'), supplierPan: F('ppan'), category: F('pcat'), billNo: F('pb'), date: F('pd'), bs: F('pbs'), customer: F('pc'), passenger: F('pp'), particulars: F('pi'), nonTax: N('pn'), taxable: N('pt'), vat: N('pv')};
+  const j = await post(ed ? '/api/purchase/' + window.eb.id : '/api/purchase', body, ed ? 'PUT' : 'POST'); if (!j) return; if (ed) { window.eb = null; tab = 'rec'; window.rt = 'purchase'; } await load();
+  toast((ed ? 'Purchase bill ' + body.billNo + ' updated (' + j.no + ')' : 'Journal voucher ' + j.no + ' created') + (j.saved ? '\nSaved to ' + j.saved : '') + (j.savedBill ? '\nPurchase bill saved to ' + j.savedBill : ''), ed ? null : 'purchase'); }
+async function saveSale() { const ed = window.eb && window.eb.kind == 'sales', body = {purchaseId: window.sp && window.sp.id, category: F('sct'), customer: F('sc'), customerVat: F('sv'), date: F('sd'), bs: F('sbs'), passenger: F('sp2'), particulars: F('si'), nonTax: N('sn'), total: N('st')}; if (ed) body.billNo = F('sbn');
+  const j = await post(ed ? '/api/sales/' + window.eb.id : '/api/sales', body, ed ? 'PUT' : 'POST'); if (!j) return;
+  if (ed) { window.eb = null; tab = 'rec'; window.rt = 'sales'; await load(); return toast('Sales bill ' + j.billNo + ' updated' + (j.saved ? '\nInvoice saved to ' + j.saved : '')); }
+  window.sp = null; await load(); j.saved ? toast('Sales bill ' + j.billNo + ' saved to ' + j.saved, 'sales') : getFile('/api/xlsx/bill/' + j.id); }
+// UI helpers for the bills page
+function setBt(k) { window.bt = k; $('#bw').dataset.k = k; document.querySelectorAll('#bw .seg button').forEach(b => b.classList.toggle('on', b.dataset.k == k)); }
+function makeSale(id) { window.sp = D.bills.find(x => x.id == id); window.bt = 'sales'; tab = 'bills'; render(); scrollTo(0, 0); }
+// Edit: bills and bill-made vouchers open on the bills page, customer payments on the Payments page, anything else on the voucher page
+function editBill(id) { window.eb = D.bills.find(x => x.id == id); window.sp = null; window.bt = window.eb.kind; tab = 'bills'; render(); scrollTo(0, 0); }
+function cancelEdit() { window.eb = null; render(); }
+function editV(id) { const v = D.vouchers.find(x => x.id == id), b = D.bills.find(x => x.voucherId == id); if (b) return editBill(b.id);
+  if (v.sal) { window.sle = v; window.sls = null; tab = 'sal'; render(); return scrollTo(0, 0); }
+  if (v.rcpt) { window.rnew = !!v.rcpt.other; window.rc = v.rcpt.other ? null : v.rcpt.customer; window.er = v; window.rpre = null; tab = 'rcv'; render(); return scrollTo(0, 0); }
+  if (v.pmt) { window.pyn = !!v.pmt.other; window.pys = v.pmt.other ? null : v.pmt.supplier; window.pye = v; window.pyp = null; tab = 'pay'; render(); return scrollTo(0, 0); }
+  window.ev = v; tab = 'voucher'; render(); scrollTo(0, 0); }
+// Payments received
+const MODES = ['Cash', 'Cheque', 'Fonepay', 'Bank transfer'], cashAccs = () => { const reg = new Set(((D.db || {}).banks || []).map(b => String(b.ledger))); return D.accounts.filter(a => a.type == 'A' && (/cash|bank|fonepay|wallet/i.test(a.name) || a.group == 'Bank Accounts' || reg.has(String(a.code)))); } // every bank registered in Settings (or filed under Bank Accounts) is listed, whatever its ledger is called;
+function newPay() { window.rnew = true; window.rc = null; window.er = null; window.rpre = null; render(); scrollTo(0, 0); }
+function rcrChg() { $('#rcnw').hidden = !!F('rcr'); }
+async function saveNewReceipt() { const er = window.er, cr = F('rcr'), body = {customer: cr ? '' : F('rcn'), creditAccount: cr, payer: F('rpy'), date: F('rdt'), bs: F('rbs'), amount: N('ram'), mode: F('rmo'), account: F('rac'), instrument: F('rin'), note: F('rnt')};
+  const j = await post(er ? '/api/receipts/' + er.id : '/api/receipts', body, er ? 'PUT' : 'POST'); if (!j) return; window.er = null; window.rpre = null; window.rnew = false; window.rc = cr ? null : body.customer; await load();
+  toast('Payment ' + j.no + (er ? ' updated' : ' recorded') + (j.saved ? '\nSaved to ' + j.saved : ''), 'received'); }
+function pickCust(i) { window.rnew = false; window.rc = D.receivables[i].name; window.er = null; window.rpre = null; render(); if (window.matchMedia && matchMedia('(max-width:1000px)').matches) $('#cdet').scrollIntoView(); }
+function rmode() { const want = {Cash: ['cash'], Cheque: ['bank'], Fonepay: ['fonepay', 'bank'], 'Bank transfer': ['bank']}[$('#rmo').value] || []; for (const w of want) { const a = cashAccs().find(x => x.name.toLowerCase().includes(w)); if (a) { $('#rac').value = a.code; break; } } }
+function rcvBill(id, due) { window.er = null; window.rpre = {billId: id, amount: due}; render(); $('#ram').focus(); }
+async function saveReceipt() { const er = window.er, body = {customer: window.rc, date: F('rdt'), bs: F('rbs'), amount: N('ram'), mode: F('rmo'), account: F('rac'), instrument: F('rin'), billId: F('rbl') || null, note: F('rnt'), payer: er && er.rcpt.payer || ''};
+  const j = await post(er ? '/api/receipts/' + er.id : '/api/receipts', body, er ? 'PUT' : 'POST'); if (!j) return; window.er = null; window.rpre = null; await load();
+  toast('Payment ' + j.no + (er ? ' updated' : ' recorded') + (j.saved ? '\nSaved to ' + j.saved : ''), 'received'); }
+// Payments made (to suppliers; mirrors Payments received)
+function pickSup(i) { window.pyn = false; window.pys = D.payables[i].name; window.pye = null; window.pyp = null; render(); if (window.matchMedia && matchMedia('(max-width:1000px)').matches) $('#sdet').scrollIntoView(); }
+function newPaid() { window.pyn = true; window.pys = null; window.pye = null; window.pyp = null; render(); scrollTo(0, 0); }
+function paySupBill(id, due) { window.pye = null; window.pyp = {billId: id, amount: due}; render(); $('#yam').focus(); }
+function ymode() { $('#yfw').hidden = $('#ymo').value != 'Fonepay'; if ($('#ysw')) $('#ysw').hidden = $('#ymo').value != 'Cheque'; const want = {Cash: ['cash'], Cheque: ['bank'], Fonepay: ['fonepay', 'bank'], 'Bank transfer': ['bank']}[$('#ymo').value] || []; for (const w of want) { const a = cashAccs().find(x => x.name.toLowerCase().includes(w)); if (a) { $('#yac').value = a.code; break; } } chqPick('yin', 'yac', 'ymo'); }
+function ycrChg() { $('#ycnw').hidden = !!F('ycr'); }
+async function savePayment(isNew) { if (!chqOk('yin', 'yac', 'ymo')) return; const more = spRows(); if (!more) return; const er = window.pye, cr = isNew ? F('ycr') : '', body = {supplier: isNew ? (cr ? '' : F('ycn')) : window.pys, debitAccount: cr, payee: isNew ? F('ypy') : (er && er.pmt.payee || ''), date: F('ydt'), bs: F('ybs'), amount: N('yam'), mode: F('ymo'), account: F('yac'), instrument: F('yin'), billId: isNew ? null : (F('ybl') || null), note: F('ynt'), fee: N('yfe'), more};
+  const j = await post(er ? '/api/payments/' + er.id : '/api/payments', body, er ? 'PUT' : 'POST'); if (!j) return; window.pye = null; window.pyp = null; if (isNew) { window.pyn = false; window.pys = cr ? null : body.supplier; } await load();
+  toast('Payment ' + j.no + (er ? ' updated' : ' recorded') + (j.saved ? '\nSaved to ' + j.saved : ''), 'made'); }
+const collected = () => { const got = D.vouchers.filter(v => v.rcpt && !v.rcpt.other && per(v.date)).reduce((t, v) => t + v.rcpt.amount, 0), due = D.accounts.filter(a => a.group == 'Sundry Debtors').reduce((t, a) => t + net(a.code, cum), 0);
+  return `<div class="vat" style="max-width:820px"><div><span>Received from customers in this period</span><b>${f(got)}</b></div><div><span>Still receivable from customers (as at ${TO()})</span><b>${f(due)}</b></div></div><p class="sub" style="max-width:820px"><small>Income below is counted when the sales bill is made. The two figures above show how much of what you billed has actually been collected.</small></p>`; };
+function filt(inp, tbody) { const q = inp.value.trim().toLowerCase(); document.querySelectorAll('#' + tbody + ' tr[data-q]').forEach(r => r.hidden = !!q && !r.dataset.q.includes(q)); }
+const V = {
+  stmt: () => { const k = window.stk || 'supplier', L = stmtList(k), d = stmtDates(), sel = L.find(x => x.n == window.stn); window.stl = L; if (!sel) window.stn = null;
+    return `<div class="seg">${SK.map(([id, t]) => `<button class="${id == k ? 'on' : ''}" onclick="window.stk='${id}';window.stn=null;render()">${t}</button>`).join('')}</div>
+    <div class="md"><div class="card lc"><div class="ch"><h2>${SK.find(x => x[0] == k)[1]}</h2></div><input type="search" id="sq" placeholder="Search by name…" oninput="sqFilter()" style="margin-bottom:10px">
+      <div class="tw"><table><tbody id="smbody">${L.map((x, i) => `<tr class="click ${sel && sel.n == x.n ? 'sel' : ''}" data-i="${i}" data-q="${esc((x.n + ' ' + (x.sub || '')).toLowerCase())}" onclick="pickStmt(${i})"><td><b>${esc(x.n)}</b>${x.sub ? '<br><small>' + esc(x.sub) + '</small>' : ''}</td><td class="n">${x.s}<br><small>${x.t}</small></td></tr>`).join('') || '<tr><td class="empty" colspan="2">Nothing here yet.</td></tr>'}</tbody></table></div></div>
+    <div class="card"><div class="ch"><h2>${sel ? 'Statement: ' + esc(sel.n) : 'Statement'}</h2>${sel ? `<div class="fl"><label style="margin:0">From<input type="date" id="sdf" value="${d.from}" onchange="setStmtDates()"></label><label style="margin:0">To<input type="date" id="sdt" value="${d.to}" onchange="setStmtDates()"></label><button class="p" onclick="getFile(stmtUrl('xlsx/'))">Download Excel</button></div>` : ''}</div>
+      ${sel ? '<div id="smain"><p class="sub">Loading…</p></div>' : '<p class="sub" style="margin:0">Pick a name on the left, or type part of a name in the search box. Its statement appears here and can be downloaded as Excel. Downloads are also saved to the Statements folder when a storage folder is set in Settings.</p>'}</div></div>`; },
+  dash: () => {
+    const sales = D.bills.filter(b => b.kind == 'sales' && per(b.date)), purch = D.bills.filter(b => b.kind == 'purchase' && per(b.date)), tot = l => rd(l.reduce((s, b) => s + b.total, 0));
+    const inc = -ofType('I').reduce((s, a) => s + net(a.code, per), 0), exp = ofType('X').reduce((s, a) => s + net(a.code, per), 0), profit = inc - exp;
+    const cash = cashAccs().reduce((s, a) => s + net(a.code, cum), 0), rec = D.receivables.reduce((t, c) => t + Math.max(c.balance, 0), 0), pay = D.payables.reduce((t, c) => t + Math.max(c.balance, 0), 0);
+    const vat = -net('2020', cum) - net('1050', cum), unsold = D.bills.filter(b => b.kind == 'purchase' && !b.sold), unsoldAmt = unsold.reduce((t, b) => t + b.total, 0);
+    // months in the selected period
+    const months = []; let [y, m] = FR().split('-').map(Number); const [ey, em] = TO().split('-').map(Number);
+    while ((y < ey || (y == ey && m <= em)) && months.length < 36) { months.push(y + '-' + String(m).padStart(2, '0')); if (++m > 12) { m = 1; y++; } }
+    const MN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'], lab = months.map(k => MN[+k.slice(5) - 1] + " '" + k.slice(2, 4));
+    const byM = l => months.map(k => rd(l.filter(b => b.date.slice(0, 7) == k).reduce((s, b) => s + b.total, 0)));
+    const plM = months.map(k => rd(D.vouchers.filter(v => per(v.date) && v.date.slice(0, 7) == k).reduce((s, v) => s + v.lines.reduce((t, l) => { const a = acc(l.account); return a && 'IX'.includes(a.type) ? t + l.cr - l.dr : t; }, 0), 0)));
+    // sales by category with margin on bills made from a purchase
+    const cat = {}; sales.forEach(b => { const c = b.category || 'Other', pb = D.bills.find(x => x.id == b.purchaseId), e = cat[c] = cat[c] || {v: 0, m: 0, n: 0}, rev = b.nonTax + b.taxable; e.v += rev; e.n++; if (pb) e.m += rev - (pb.nonTax + pb.taxable); });
+    const catItems = Object.entries(cat).sort((a, b) => b[1].v - a[1].v).map(([l, e]) => ({l, v: e.v, s: e.n + ' bill' + (e.n > 1 ? 's' : '') + (e.m ? ' · margin ' + K(e.m) : '')}));
+    const top = (list, key) => { const o = {}; list.forEach(b => o[b[key]] = (o[b[key]] || 0) + b.total); return Object.entries(o).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([l, v]) => ({l, v})); };
+    const age = d => Math.floor((Date.now() - new Date(d)) / 864e5), aging = list => { const b = [0, 0, 0, 0]; list.forEach(x => b[age(x.date) <= 30 ? 0 : age(x.date) <= 60 ? 1 : age(x.date) <= 90 ? 2 : 3] += x.due); return ['0–30 days', '31–60 days', '61–90 days', '90+ days'].map((l, i) => ({l, v: b[i]})); };
+    const dueR = D.receivables.flatMap(c => c.bills.filter(b => b.due > .004)), dueP = D.payables.flatMap(c => c.bills.filter(b => b.due > .004));
+    let ex = ofType('X').map(a => ({l: a.name, v: net(a.code, per)})).filter(x => x.v > .004).sort((a, b) => b.v - a.v); if (ex.length > 6) ex = [...ex.slice(0, 6), {l: 'Other expenses', v: ex.slice(6).reduce((s, x) => s + x.v, 0)}];
+    const kp = (l, v, s, c = '') => `<div class="${c}"><span>${l}</span><b>${v}</b>${s ? `<small>${s}</small>` : ''}</div>`;
+    return `<p class="sub">Figures for <b>${FR()}</b> to <b>${TO()}</b> (change the period at the top). Balances such as cash, receivable and payable are as at ${TO()}. Months are English (AD) months.</p>
+    <div class="vat k4">${kp('Sales billed', f0(tot(sales)), sales.length + (sales.length == 1 ? ' bill' : ' bills') + ', incl. VAT')}${kp('Purchases billed', f0(tot(purch)), purch.length + (purch.length == 1 ? ' bill' : ' bills') + ', incl. VAT')}${kp('Net profit', f0(profit), 'Income ' + K(inc) + ' − expenses ' + K(exp), 'net')}${kp('Cash &amp; bank', f0(cash), '')}
+      ${kp('Receivable from customers', f0(rec), dueR.length + (dueR.length == 1 ? ' unpaid bill' : ' unpaid bills'))}${kp('Payable to suppliers', f0(pay), dueP.length + (dueP.length == 1 ? ' unpaid bill' : ' unpaid bills'))}${kp('VAT ' + (vat >= 0 ? 'payable' : 'credit'), f0(Math.abs(vat)), 'Output − input VAT')}${kp('Purchases not yet sold', unsold.length, f0(unsoldAmt) + ' waiting for a sales bill')}</div>
+    <div class="dash">
+      <div class="card full"><div class="ch"><h2>Sales vs purchases by month</h2><span class="sub" style="margin:0">Bill totals incl. VAT</span></div>${barChart(lab, [{name: 'Sales', color: '#27418F', vals: byM(sales)}, {name: 'Purchases', color: '#E0A030', vals: byM(purch)}])}</div>
+      <div class="card"><div class="ch"><h2>Profit by month</h2><span class="sub" style="margin:0">Income − expenses (red = loss)</span></div>${barChart(lab, [{name: 'Profit', color: '#1D7448', vals: plM}])}</div>
+      <div class="card"><div class="ch"><h2>Expenses by account</h2></div>${donut(ex)}</div>
+      <div class="card"><div class="ch"><h2>Sales by category</h2><span class="sub" style="margin:0">Excl. VAT · margin on bills made from a purchase</span></div>${hbars(catItems, '#27418F')}</div>
+      <div class="card"><div class="ch"><h2>Top customers</h2><span class="sub" style="margin:0">By sales billed</span></div>${hbars(top(sales, 'customer'), '#27418F')}<div class="ch" style="margin-top:18px"><h2>Top suppliers</h2><span class="sub" style="margin:0">By purchases billed</span></div>${hbars(top(purch, 'supplier'), '#E0A030')}</div>
+      <div class="card full"><div class="ch"><h2>Who owes what, by age of bill</h2><span class="sub" style="margin:0">Unpaid amounts, counted from the bill date</span></div>
+        <div class="ag"><div><h3>Customers owe you</h3>${hbars(aging(dueR), '#B42318')}</div><div><h3>You owe suppliers</h3>${hbars(aging(dueP), '#A8730F')}</div></div></div>
+    </div>`; },
+  rec: () => { const k = window.rt || 'purchase', q = (...a) => esc(a.join(' ').toLowerCase()), byId = {}, st = {}; D.bills.forEach(b => byId[b.id] = b); D.receivables.forEach(c => c.bills.forEach(x => st[x.id] = x)); D.payables.forEach(c => c.bills.forEach(x => st[x.id] = x));
+    const PB = D.bills.filter(b => b.kind == 'purchase').reverse(), SB = D.bills.filter(b => b.kind == 'sales').reverse(), vs = fn => D.vouchers.filter(fn).sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id), RV = vs(v => v.rcpt), PM = vs(v => v.pmt), SL = vs(v => v.sal);
+    const secs = [['purchase', 'Purchase bills', PB.length], ['sales', 'Sales bills', SB.length], ['received', 'Payments received', RV.length], ['made', 'Payments made', PM.length], ['salary', 'Salary payments', SL.length]];
+    const pay = id => { const x = st[id]; return !x ? '' : x.status == 'Paid' ? '<span class="chip ok">Paid</span>' : x.status == 'Partial' ? `<span class="chip due">Part paid · due ${f(x.due)}</span>` : '<span class="chip due">Unpaid</span>'; }, pst = id => st[id] ? st[id].status.toLowerCase() : '';
+    const sel = (id, l, opts) => `<select id="${id}" onchange="recFilter()" title="${l}"><option value="">${l}</option>${opts.map(([v, t]) => `<option value="${esc(v)}">${esc(t || v)}</option>`).join('')}</select>`, cats = L => [...new Set(L.map(b => b.category || '').filter(Boolean))].sort().map(c => [c]), modes = MODES.map(m => [m]);
+    const vact = v => `<a href="#" onclick="getFile('/api/xlsx/voucher/${v.id}');return false">Excel</a> <button onclick="editV(${v.id})">Edit</button> <button class="d" onclick="del(${v.id})">Delete</button>`, dt = (d, bs) => d + (bs ? '<br><small>' + esc(bs) + '</small>' : ''), an = id => (D.accounts.find(a => a.code == id) || {}).name || '';
+    const sm = v => `${esc(v.rcpt ? v.rcpt.mode : v.pmt ? v.pmt.mode : v.sal.mode)}${v.ref ? '<br><small>' + esc(v.ref) + '</small>' : ''}${(v.pmt || v.sal || {}).fee ? '<br><small>Fonepay charge ' + f((v.pmt || v.sal).fee) + '</small>' : ''}`;
+    const tr = (data, cells) => `<tr data-q="${data.q}" data-d="${data.d}" data-c="${esc(data.c || '')}" data-a="${data.a || ''}" data-p="${data.p || ''}" data-m="${esc(data.m || '')}" data-amt="${data.amt}">${cells.map((c, i) => c.startsWith('N:') ? `<td class="n">${c.slice(2)}</td>` : c.startsWith('A:') ? `<td class="act">${c.slice(2)}</td>` : `<td>${c}</td>`).join('')}</tr>`;
+    let head, filters, rows, hint;
+    if (k == 'purchase') { hint = 'Search supplier, bill no., customer, passenger, sales bill no…'; head = ['Date', 'Supplier', 'Customer / passenger', 'Category', 'Total', 'Sales bill', 'Payment', 'Actions'];
+      filters = sel('rfc', 'All categories', cats(PB)) + sel('rfa', 'Sold & not sold', [['sold', 'Sold (sales bill made)'], ['unsold', 'Not sold yet']]) + sel('rfp', 'Any payment status', [['paid', 'Paid'], ['partial', 'Part paid'], ['unpaid', 'Unpaid']]);
+      rows = PB.map(b => { const sb = SB.find(x => x.purchaseId == b.id), sold = !!(sb || b.sold); return tr({q: q(b.supplier, b.billNo, b.supplierPan, b.customer, b.passenger, b.particulars, b.category, b.voucher, b.date, b.bs, b.total, sb ? sb.billNo + ' ' + sb.customer : b.sold || ''), d: b.date, c: b.category, a: sold ? 'sold' : 'unsold', p: pst(b.id), amt: b.total},
+        [dt(b.date, b.bs), `<b>${esc(b.supplier)}</b><br><small>Bill ${esc(b.billNo)}${b.supplierPan ? ' · PAN ' + esc(b.supplierPan) : ''}</small>`, esc(b.customer || '') + (b.passenger ? '<br><small>' + esc(b.passenger) + '</small>' : ''), esc(b.category || ''), 'N:' + f(b.total),
+          sold ? `<span class="chip ok">Sold · ${esc(sb ? sb.billNo : b.sold)}</span>${sb ? '<br><small>' + esc(sb.customer) + '</small>' : ''}` : '<span class="chip">Not sold yet</span>', pay(b.id),
+          `A:${sold ? '' : `<button onclick="makeSale(${b.id})">Create sales bill</button> `}<button onclick="editBill(${b.id})">Edit</button><br><a href="#" onclick="getFile('/api/xlsx/voucher/${b.voucherId}');return false\">${b.voucher} Excel</a> · <a href="#" onclick="getFile('/api/xlsx/bill/${b.id}');return false">Bill Excel</a> <button class="d" onclick="delBill(${b.voucherId}, 'purchase')">Delete</button>`]); }); }
+    else if (k == 'sales') { hint = 'Search customer, bill no., passenger, purchase bill no. or supplier…'; head = ['Date', 'Bill no.', 'Customer', 'Category', 'Made from purchase', 'Total', 'Payment', 'Actions'];
+      filters = sel('rfc', 'All categories', cats(SB)) + sel('rfa', 'From purchase or direct', [['sold', 'Made from a purchase bill'], ['unsold', 'Entered directly']]) + sel('rfp', 'Any payment status', [['paid', 'Paid'], ['partial', 'Part paid'], ['unpaid', 'Unpaid']]);
+      rows = SB.map(b => { const pb = byId[b.purchaseId]; return tr({q: q(b.billNo, b.customer, b.customerVat, b.passenger, b.particulars, b.category, b.voucher, b.date, b.bs, b.total, pb ? pb.billNo + ' ' + pb.supplier : ''), d: b.date, c: b.category, a: pb ? 'sold' : 'unsold', p: pst(b.id), amt: b.total},
+        [dt(b.date, b.bs), `<b>${esc(b.billNo)}</b>`, `<b>${esc(b.customer)}</b>${b.passenger ? '<br><small>' + esc(b.passenger) + '</small>' : ''}`, esc(b.category || ''), pb ? `${esc(pb.supplier)}<br><small>Purchase bill ${esc(pb.billNo)}</small>` : '<small>—</small>', 'N:' + f(b.total), pay(b.id),
+          `A:<a href="#" onclick="getFile('/api/xlsx/bill/${b.id}');return false">Excel</a> <button onclick="editBill(${b.id})">Edit</button> <button class="d" onclick="delBill(${b.voucherId}, 'sales')">Delete</button><br><small>${b.voucher}</small>`]); }); }
+    else if (k == 'received') { hint = 'Search payer, customer, voucher, cheque / transaction no., bill…'; head = ['Date', 'Voucher', 'Received from', 'Applied to', 'Mode', 'Received in', 'Amount', 'Actions'];
+      filters = sel('rfm', 'Any mode', modes) + sel('rfa', 'All payers', [['sold', 'Recorded customers'], ['unsold', 'Other payers']]);
+      rows = RV.map(v => { const r = v.rcpt, who = r.other ? r.payer : r.customer, to = r.other ? 'Credited to ' + an(r.creditAccount) : r.billId && byId[r.billId] ? 'Bill ' + byId[r.billId].billNo : 'Oldest bills first'; return tr({q: q(who, r.customer, r.payer, v.no, r.instrument, r.note, to, r.mode, v.date, v.bs, r.amount), d: v.date, a: r.other ? 'unsold' : 'sold', m: r.mode, amt: r.amount},
+        [dt(v.date, v.bs), `<b>${v.no}</b>`, `${esc(who)}${!r.other && r.payer && r.payer != r.customer ? '<br><small>paid by ' + esc(r.payer) + '</small>' : ''}${r.note ? '<br><small>' + esc(r.note) + '</small>' : ''}`, esc(to), sm(v), esc(an(r.account)), 'N:' + f(r.amount), 'A:' + vact(v)]); }); }
+    else if (k == 'made') { hint = 'Search payee, supplier, voucher, cheque / transaction no., bill…'; head = ['Date', 'Voucher', 'Paid to', 'Applied to', 'Mode', 'Paid from', 'Amount', 'Actions'];
+      filters = sel('rfm', 'Any mode', modes) + sel('rfa', 'All payees', [['sold', 'Recorded suppliers'], ['unsold', 'Other payees']]);
+      rows = PM.map(v => { const r = v.pmt, who = r.other ? r.payee : r.supplier, to = r.other ? 'Charged to ' + an(r.debitAccount) : r.billId && byId[r.billId] ? 'Bill ' + byId[r.billId].billNo : 'Oldest bills first'; return tr({q: q(who, r.supplier, r.payee, v.no, r.instrument, r.note, to, r.mode, v.date, v.bs, r.amount), d: v.date, a: r.other ? 'unsold' : 'sold', m: r.mode, amt: r.amount},
+        [dt(v.date, v.bs), `<b>${v.no}</b>`, `${esc(who)}${!r.other && r.payee && r.payee != r.supplier ? '<br><small>via ' + esc(r.payee) + '</small>' : ''}${r.note ? '<br><small>' + esc(r.note) + '</small>' : ''}`, esc(to), sm(v), esc(payFromName(r)), 'N:' + f(r.amount), 'A:' + vact(v)]); }); }
+    else { hint = 'Search staff name, month, voucher, note…'; head = ['Date', 'Voucher', 'Staff', 'Salary for', 'Mode', 'Paid from', 'Amount', 'Actions']; filters = sel('rfm', 'Any mode', modes);
+      rows = SL.map(v => { const r = v.sal; return tr({q: q(r.staff, r.period, v.no, r.instrument, r.note, r.mode, v.date, v.bs, r.amount), d: v.date, m: r.mode, amt: r.amount},
+        [dt(v.date, v.bs), `<b>${v.no}</b>`, `<b>${esc(r.staff)}</b>${r.note ? '<br><small>' + esc(r.note) + '</small>' : ''}`, esc(r.period || ''), sm(v), esc(an(r.account)), 'N:' + f(r.amount), 'A:' + vact(v)]); }); }
+    return `<div class="seg">${secs.map(([id, t, n]) => `<button class="${id == k ? 'on' : ''}" onclick="window.rt='${id}';render()">${t}<i>${n}</i></button>`).join('')}</div>
+    <div class="card"><div class="ch"><div class="fl" style="flex:1"><input type="search" id="rq" placeholder="${hint}" oninput="recFilter()">${filters}<input type="date" id="rd1" title="From date" onchange="recFilter()"><input type="date" id="rd2" title="To date" onchange="recFilter()"><button onclick="render()">Clear</button></div><span class="sub" id="rcount" style="margin:0"></span></div>
+    <div class="tw"><table><thead><tr>${head.map(h => `<th class="${h == 'Total' || h == 'Amount' ? 'n' : ''}">${h}</th>`).join('')}</tr></thead><tbody id="rbody">${rows.join('') || `<tr><td class="empty" colspan="8">Nothing here yet.</td></tr>`}</tbody></table></div></div>`; },
+  sal: () => { const key = x => String(x || '').trim().toLowerCase(), er = window.sle, today = ymd(), ca = cashAccs(),
+      pre = er ? {staff: er.sal.staff, period: er.sal.period, date: er.date, bs: er.bs, amount: er.sal.amount, mode: er.sal.mode, account: er.sal.account, instrument: er.sal.instrument, note: er.sal.note, debit: er.sal.debitAccount, fee: er.sal.fee} : (window.slp || {}),
+      dflt = pre.account || (ca.find(a => /cash/i.test(a.name)) || ca[0] || {}).code, inp = (id, l, v = '', x = '', c = '') => `<label class="${c}">${l}<input id="${id}" value="${esc(v)}" ${x}></label>`,
+      pays = D.vouchers.filter(v => v.sal).sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id), S = D.db.staff.map((s, i) => ({...s, i})).sort((a, b) => a.name.localeCompare(b.name)),
+      mine = n => pays.filter(v => key(v.sal.staff) == key(n)), sel = S.find(s => key(s.name) == key(window.sls)), mon = today.slice(0, 7), debs = D.accounts.filter(a => a.code == '6000' || a.code == '2040');
+    return `<div class="vat"><div><span>Salary paid this month</span><b>${f(pays.filter(v => v.date.slice(0, 7) == mon).reduce((t, v) => t + v.sal.amount, 0))}</b></div><div><span>Salary paid, all time</span><b>${f(pays.reduce((t, v) => t + v.sal.amount, 0))}</b></div><div><span>Staff on the list</span><b>${S.length}</b></div></div>
+    <div class="md"><div class="card lc"><div class="ch"><h2>Staff</h2></div><input type="search" placeholder="Search staff" oninput="filt(this,'stbody')" style="margin-bottom:10px">
+      <div class="tw"><table><tbody id="stbody">${S.map(s => { const l = mine(s.name); return `<tr class="click ${sel && sel.i == s.i ? 'sel' : ''}" data-q="${esc((s.name + ' ' + (s.designation || '')).toLowerCase())}" onclick="pickStaff(${s.i})"><td><b>${esc(s.name)}</b>${s.designation ? '<br><small>' + esc(s.designation) + '</small>' : ''}</td><td class="n">${l.length ? f(l.reduce((t, v) => t + v.sal.amount, 0)) + '<br><small>' + l.length + ' payment' + (l.length > 1 ? 's' : '') + '</small>' : '—'}</td></tr>`; }).join('') || '<tr><td class="empty" colspan="2">No staff yet. A name is added here when you save a salary payment.</td></tr>'}</tbody></table></div></div>
+    <div><div class="card"><div class="ch"><h2>${er ? 'Edit salary payment ' + esc(er.no) : 'Record salary payment'}</h2></div>
+      <div class="row">${inp('lnm', 'Staff name (pick or type new)', pre.staff, 'list="stf" autocomplete="off"', 'w2')}${inp('lpr', 'Salary for (e.g. Kartik 2083)', pre.period, '', 'w2')}
+        <label>Date (AD)<input type="date" id="ldt" value="${pre.date || today}"></label>${inp('lbs', 'Date (BS)', pre.bs)}${inp('lam', 'Amount paid', pre.amount, 'type="number" step="any"')}
+        <label>Mode<select id="lmo" onchange="lmode()">${MODES.map(m => `<option ${m == pre.mode ? 'selected' : ''}>${m}</option>`).join('')}</select></label><label id="lfw" ${pre.mode == 'Fonepay' ? '' : 'hidden'}>Fonepay charge<input id="lfe" type="number" step="any" value="${pre.fee ?? ''}" placeholder="0.00"></label>
+        <label>Paid from<select id="lac">${ca.map(a => `<option value="${a.code}" ${a.code == dflt ? 'selected' : ''}>${esc(a.name)}</option>`).join('')}</select></label>${inp('lin', 'Cheque no. / Transaction ID', pre.instrument, `oninput="chqPick('lin','lac','lmo')"`)}
+        <label>Charged to<select id="lde">${debs.map(a => `<option value="${a.code}" ${a.code == (pre.debit || '6000') ? 'selected' : ''}>${esc(a.name)}</option>`).join('')}</select></label>${inp('lnt', 'Note (optional)', pre.note, '', 'w2')}</div>
+      <p class="sub" style="margin:8px 0 0"><small>A new staff name is added to the staff list automatically. Use Salary Payable only if the salary was already booked as owed in an earlier journal.</small></p>
+      <div class="actbar"><button class="p" onclick="saveSalary()">${er ? 'Update payment' : 'Save payment'}</button>${er ? '<button onclick="window.sle=null;render()">Cancel</button>' : ''}</div></div>
+    <div class="card"><div class="ch"><h2>${sel ? 'Staff details: ' + esc(sel.name) : 'Add or update a staff member'}</h2></div><div class="row">${inp('ldn', 'Name', sel ? sel.name : '', '', 'w2')}${inp('ldg', 'Designation', sel ? sel.designation : '')}${inp('lph', 'Phone', sel ? sel.phone : '')}</div>
+      <div class="actbar"><button class="p" onclick="saveStaff()">Save staff</button>${sel ? `<button class="d" onclick="delStaff(${sel.i})">Remove from list</button><button onclick="window.sls=null;render()">Close</button>` : ''}</div></div>
+    ${sel ? `<div class="card"><div class="ch"><h2>Payments to ${esc(sel.name)}</h2></div><div class="tw"><table><thead><tr><th>Date</th><th>Voucher</th><th>Salary for</th><th>Mode</th><th class="n">Amount</th><th></th></tr></thead><tbody>${mine(sel.name).map(v => `<tr><td>${v.date}${v.bs ? '<br><small>' + esc(v.bs) + '</small>' : ''}</td><td><b>${v.no}</b></td><td>${esc(v.sal.period)}</td><td>${esc(v.sal.mode)}</td><td class="n">${f(v.sal.amount)}</td><td class="act"><button onclick="editV(${v.id})">Edit</button> <button class="d" onclick="del(${v.id})">Delete</button></td></tr>`).join('') || '<tr><td class="empty" colspan="6">No payments yet.</td></tr>'}</tbody></table></div></div>` : ''}</div></div>`; },
+  parties: () => `<p class="sub">Suppliers and customers saved here fill in automatically on the bill forms. New names are added when you save a bill.</p>
+    <div class="card"><div class="row">${['dn:Name:w2', 'dp:PAN/VAT no.', 'da:Address:w2', 'dph:Phone', 'de:Email'].map(x => { const [i, l, c] = x.split(':'); return `<label class="${c || ''}">${l}<input id="${i}"></label>`; }).join('')}<label>Type<select id="dt"><option value="supplier">Supplier</option><option value="customer">Customer</option><option value="both">Both</option></select></label>
+    <button class="p" onclick="saveParty()">Save / update</button></div></div>
+    <div class="card"><div class="tw"><table><tr><th>Name</th><th>Type</th><th>PAN/VAT</th><th>Address</th><th>Phone</th><th>Email</th><th></th></tr>${D.db.parties.map((p, i) => `<tr><td><b>${esc(p.name)}</b></td><td><span class="chip">${esc(p.type)}</span></td><td>${esc(p.pan)}</td><td>${esc(p.address)}</td><td>${esc(p.phone)}</td><td>${esc(p.email)}</td><td class="act"><button onclick="editParty(${i})">Edit</button><button class="d" title="Remove" onclick="delParty(${i})">Delete</button></td></tr>`).join('') || '<tr><td class="empty" colspan="7">No parties yet. They are added when you save a bill, or fill the form above.</td></tr>'}</table></div></div>`,
+  settings: () => { const s = D.settings, c = s.company, chk = (id, k, sub) => `<label class="chk"><input type="checkbox" id="${id}" ${s.auto[k] ? 'checked' : ''}> Auto-save <b>${sub}</b></label>`;
+    return `<div class="card"><div class="ch"><h2>Storage folder</h2></div>${s.folderOwner && !s.folderOwner.ok ? `<div style="background:#fdecea;border:1px solid #f1b5ae;color:#8a1f13;border-radius:8px;padding:10px 12px;margin:0 0 12px;font-size:13px"><b>This folder belongs to another copy of the app</b> (${esc(s.folderOwner.owner)}). This copy is not writing or deleting any files there. Choose a different folder, or if you moved the project, press <b>Save settings</b> to take the folder over.</div>` : ''}<div class="row"><label class="w4">Folder on this computer (full path)<input id="sf" value="${esc(s.folder)}" placeholder="/home/you/Documents/Accounts"></label></div>
+    <div class="row" style="margin-top:10px">${chk('aj', 'jv', 'JV')}${chk('av', 'pv', 'PV')}${chk('apm', 'pmv', 'PMV')}${chk('ast', 'stm', 'Statements')}${chk('as', 'sv', 'SV')}${chk('arv', 'rv', 'RV')}${chk('ar', 'registers', 'Registers')}${chk('at', 'tb', 'TrialBalance')}${chk('ap', 'pl', 'IncomeStatement')}${chk('ab', 'bs', 'BalanceSheet')}</div>
+    <p class="sub" style="margin:10px 0 0"><small>Sub-folders created inside it automatically: ${s.folders.join(', ')}. Journal vouchers and sales bills are saved here when you create them. With a switch on, every Excel button for that item saves into this folder instead of your browser's Downloads folder; with it off (or no folder set), the browser downloads it as usual. A browser cannot browse folders for the server, so type the path.</small></p>
+    <div class="actbar" style="margin-top:10px"><button onclick="rebuildFiles()" ${s.folder && !(s.folderOwner && !s.folderOwner.ok) ? '' : 'disabled'}>Rebuild Excel files from this data</button><label style="display:inline-flex;gap:6px;align-items:center;font-size:13px"><input type="checkbox" id="rbm" style="width:auto"> Also create files that are missing</label></div>
+    <p class="sub" style="margin:6px 0 0"><small>Use this to repair the voucher and bill files in the folder, for example if another copy of the app overwrote them. Each file is rewritten from this app's data, so it always matches the ledger.</small></p></div>
+    <div class="card"><div class="ch"><h2>Categories</h2><span class="sub" style="margin:0">Shown on purchase and sales bills</span></div><p>${s.categories.map((c, i) => `<span class="chip" style="margin:0 6px 6px 0">${esc(c)} <a href="#" title="Remove" onclick="delCat(${i});return false">×</a></span>`).join('')}</p>
+    <div class="row" style="grid-template-columns:minmax(170px,260px) auto;justify-content:start"><label>Add category (e.g. Visa)<input id="newcat"></label><button onclick="addCat()">Add</button></div><p class="sub" style="margin:8px 0 0"><small>Each category gets its own "&lt;name&gt; Purchase" and "&lt;name&gt; Sales" accounts the first time it is used. Removing one only takes it off the list; old entries keep their accounts.</small></p></div>
+    ${bankCard()}${bankMatchCard()}${bankSplitCard()}
+    <div class="card"><div class="ch"><h2>Company</h2><span class="sub" style="margin:0">Printed on Excel bills and registers</span></div><div class="row">${[['cn', 'Name', c.name, 'w2'], ['cv', 'PAN/VAT no.', c.vat, ''], ['ca', 'Address', c.addr, 'w2'], ['ct', 'Phone', c.tel, ''], ['ce', 'Email', c.email, '']].map(([id, l, v, w]) => `<label class="${w}">${l}<input id="${id}" value="${esc(v)}"></label>`).join('')}</div></div>
+    ${fonepayCard()}<div class="card"><div class="ch"><h2>Update old records</h2></div><p class="sub" style="margin:0 0 10px">Salaries you entered earlier on the Payments made page (charged to Salary &amp; Wages) are converted into salary payments and the names are added to the staff list. Totals and ledgers do not change. A backup of data.json and db.json is made first.</p><button onclick="migrateOld()">Check &amp; update old records</button></div>
+    <button class="p" onclick="saveSettings()">Save settings</button>`; },
+  rcv: () => { const R = D.receivables, key = x => String(x || '').trim().toLowerCase(), sel = R.find(c => key(c.name) == key(window.rc)), er = window.er, today = ymd(),
+      pre = er ? {date: er.date, bs: er.bs, amount: er.rcpt.amount, mode: er.rcpt.mode, account: er.rcpt.account, instrument: er.rcpt.instrument, billId: er.rcpt.billId, note: er.rcpt.note, payer: er.rcpt.payer, credit: er.rcpt.creditAccount} : (window.rpre || {}),
+      inp = (id, l, v = '', x = '', c = '') => `<label class="${c}">${l}<input id="${id}" value="${esc(v)}" ${x}></label>`, ca = cashAccs(), dflt = pre.account || (ca.find(a => /cash/i.test(a.name)) || ca[0] || {}).code,
+      q = (...a) => esc(a.join(' ').toLowerCase()), pos = x => Math.max(x, 0), bal = n => f(Math.abs(n)) + (n >= 0 ? ' Dr' : ' Cr'),
+      tot = R.reduce((t, c) => t + pos(c.balance), 0), adv = R.reduce((t, c) => t + pos(-c.balance), 0), dues = R.filter(c => c.balance > .004).length,
+      state = c => c.balance > .004 ? '<span class="chip due">Due</span>' : c.balance < -.004 ? '<span class="chip">Advance</span>' : c.dr ? '<span class="chip ok">Settled</span>' : '',
+      stChip = b => b.status == 'Paid' ? '<span class="chip ok">Paid</span>' : b.status == 'Partial' ? '<span class="chip due">Part paid</span>' : '<span class="chip due">Unpaid</span>';
+    const rows = R.map((c, i) => ({c, i})).filter(({c}) => !window.onlyDue || c.balance > .004).map(({c, i}) => `<tr class="click ${sel && key(sel.name) == key(c.name) ? 'sel' : ''}" data-q="${q(c.name, c.pan)}" onclick="pickCust(${i})"><td><b>${esc(c.name)}</b><br>${state(c)}</td><td class="n">${c.balance > .004 ? f(c.balance) : c.balance < -.004 ? f(-c.balance) + ' adv.' : '—'}</td></tr>`).join('');
+    const credAccs = D.accounts.filter(a => !ca.some(c => c.code == a.code) && a.group != 'Sundry Debtors'), groups = [...new Set(credAccs.map(a => a.group))],
+      newForm = () => `<div class="card" id="cdet"><div class="ch"><h2>${er ? 'Edit payment ' + esc(er.no) : 'New payment received'}</h2></div>
+        <p class="sub"><small>Use this for money that did not come from one of your recorded customers, such as a transfer from another company. Choose where it should be credited: a customer's account (type the name; a new customer is added automatically), or any other account.</small></p>
+        <div class="row">${inp('rpy', 'Received from (payer)', pre.payer, 'placeholder="e.g. ABC Trading Pvt. Ltd."', 'w2')}
+          <label class="w2">Credit to<select id="rcr" onchange="rcrChg()"><option value="">A customer's account</option>${groups.map(g => `<optgroup label="${esc(g)}">${credAccs.filter(a => a.group == g).map(a => `<option value="${a.code}" ${a.code == pre.credit ? 'selected' : ''}>${esc(a.name)}</option>`).join('')}</optgroup>`).join('')}</select></label>
+          <label class="w4" id="rcnw" ${pre.credit ? 'hidden' : ''}>Customer name<input id="rcn" list="plc" value="${esc(er && !pre.credit ? er.rcpt.customer : '')}" placeholder="Whose bills is this payment for?"></label>
+          <label>Date (AD)<input type="date" id="rdt" value="${pre.date || today}"></label>${inp('rbs', 'Date (BS)', pre.bs)}${inp('ram', 'Amount received', pre.amount, 'type="number" step="any"')}
+          <label>Mode<select id="rmo" onchange="rmode()">${MODES.map(m => `<option ${m == pre.mode ? 'selected' : ''}>${m}</option>`).join('')}</select></label>
+          <label>Received in<select id="rac">${ca.map(a => `<option value="${a.code}" ${a.code == dflt ? 'selected' : ''}>${esc(a.name)}</option>`).join('')}</select></label>${inp('rin', 'Cheque no. / Transaction ID', pre.instrument)}${inp('rnt', 'Note (optional)', pre.note, '', 'w2')}</div>
+        <div class="actbar"><button class="p" onclick="saveNewReceipt()">${er ? 'Update payment' : 'Save payment'}</button><button onclick="window.er=null;window.rnew=false;render()">Cancel</button></div></div>`,
+      others = D.vouchers.filter(v => v.rcpt && v.rcpt.other).sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id),
+      otherCard = !others.length ? '' : `<div class="card"><div class="ch"><h2>Other payments received</h2><span class="sub" style="margin:0">Not from a recorded customer</span></div><div class="tw"><table><thead><tr><th>Date</th><th>Voucher</th><th>Received from</th><th>Credited to</th><th>Mode</th><th class="n">Amount</th><th></th></tr></thead><tbody>${others.map(v => { const ac = D.accounts.find(a => a.code == v.rcpt.creditAccount); return `<tr><td>${v.date}${v.bs ? '<br><small>' + esc(v.bs) + '</small>' : ''}</td><td><b>${v.no}</b>${v.ref ? '<br><small>' + esc(v.ref) + '</small>' : ''}</td><td>${esc(v.rcpt.payer)}${v.rcpt.note ? '<br><small>' + esc(v.rcpt.note) + '</small>' : ''}</td><td>${esc(ac ? ac.name : v.rcpt.creditAccount)}</td><td>${esc(v.rcpt.mode)}</td><td class="n">${f(v.rcpt.amount)}</td><td class="act"><a href="#" onclick="getFile('/api/xlsx/voucher/${v.id}');return false">Excel</a> <button onclick="editV(${v.id})">Edit</button> <button class="d" onclick="del(${v.id})">Delete</button></td></tr>`; }).join('')}</tbody></table></div></div>`;
+    const detail = window.rnew ? newForm() : !sel ? '<div class="card"><p class="sub" style="margin:0">Pick a customer on the left to see their statement and record a payment, or use <b>New payment</b> for money from someone who is not a recorded customer.</p></div>' : `
+      <div class="card" id="cdet"><div class="ch"><h2>${esc(sel.name)}</h2>${sel.pan ? `<span class="chip">PAN/VAT ${esc(sel.pan)}</span>` : ''}${state(sel)}</div>
+        <div class="vat" style="margin:0"><div><span>Billed</span><b>${f(sel.dr)}</b></div><div><span>Received</span><b>${f(sel.cr)}</b></div><div class="net"><span>${sel.balance < -.004 ? 'Advance / overpaid' : 'Outstanding'}</span><b>${f(Math.abs(sel.balance))}</b></div></div></div>
+      <div class="card"><div class="ch"><h2>${er ? 'Edit payment ' + esc(er.no) : 'Record payment received'}</h2></div>
+        <div class="row"><label>Date (AD)<input type="date" id="rdt" value="${pre.date || today}"></label>${inp('rbs', 'Date (BS)', pre.bs)}${inp('ram', 'Amount received', pre.amount, 'type="number" step="any"')}
+          <label>Mode<select id="rmo" onchange="rmode()">${MODES.map(m => `<option ${m == pre.mode ? 'selected' : ''}>${m}</option>`).join('')}</select></label>
+          <label>Received in<select id="rac">${ca.map(a => `<option value="${a.code}" ${a.code == dflt ? 'selected' : ''}>${esc(a.name)}</option>`).join('')}</select></label>${inp('rin', 'Cheque no. / Transaction ID', pre.instrument)}
+          <label>Against bill<select id="rbl"><option value="">Auto (oldest bill first)</option>${sel.bills.filter(b => b.due > .004 || b.id == pre.billId).map(b => `<option value="${b.id}" ${b.id == pre.billId ? 'selected' : ''}>${esc(b.billNo)} · ${b.date} · due ${f(b.due)}</option>`).join('')}</select></label>${inp('rnt', 'Note (optional)', pre.note, '', 'w2')}</div>
+        <div class="actbar"><button class="p" onclick="saveReceipt()">${er ? 'Update payment' : 'Save payment'}</button>${er ? '<button onclick="window.er=null;render()">Cancel</button>' : ''}</div></div>
+      <div class="card"><div class="ch"><h2>Bills</h2></div><div class="tw"><table><thead><tr><th>Date</th><th>Bill no.</th><th class="n">Total</th><th class="n">Received</th><th class="n">Due</th><th>Status</th><th></th></tr></thead><tbody>${sel.bills.map(b => `<tr><td>${b.date}</td><td><b>${esc(b.billNo)}</b></td><td class="n">${f(b.total)}</td><td class="n">${f(b.paid)}</td><td class="n">${f(b.due)}</td><td>${stChip(b)}</td><td class="act">${b.due > .004 ? `<button onclick="rcvBill(${b.id}, ${b.due})">Receive</button>` : ''}</td></tr>`).join('') || '<tr><td class="empty" colspan="7">No sales bills for this customer yet.</td></tr>'}</tbody></table></div></div>
+      <div class="card"><div class="ch"><h2>Statement</h2></div><div class="tw"><table><thead><tr><th>Date</th><th>Voucher</th><th>Particulars</th><th class="n">Billed (Dr)</th><th class="n">Received (Cr)</th><th class="n">Balance</th><th></th></tr></thead><tbody>${sel.statement.map(x => `<tr><td>${x.date}${x.bs ? '<br><small>' + esc(x.bs) + '</small>' : ''}</td><td><b>${x.no}</b>${x.ref ? '<br><small>' + esc(x.ref) + '</small>' : ''}</td><td>${esc(x.narration)}</td><td class="n">${x.dr ? f(x.dr) : ''}</td><td class="n">${x.cr ? f(x.cr) : ''}</td><td class="n">${bal(x.bal)}</td>
+        <td class="act">${x.rcpt ? `<a href="#" onclick="getFile('/api/xlsx/voucher/${x.vid}');return false">Excel</a> <button onclick="editV(${x.vid})">Edit</button> <button class="d" onclick="del(${x.vid})">Delete</button>` : x.billId ? `<a href="#" onclick="getFile('/api/xlsx/bill/${x.billId}');return false">Bill Excel</a> <button onclick="editBill(${x.billId})">Edit bill</button>` : `<button onclick="editV(${x.vid})">Edit</button>`}</td></tr>`).join('') || '<tr><td class="empty" colspan="7">Nothing yet.</td></tr>'}</tbody></table></div></div>
+      ${sel.pending.length ? `<div class="card"><div class="ch"><h2>Purchased for this customer, not billed yet</h2></div><div class="tw"><table><tbody>${sel.pending.map(x => `<tr><td>${x.date}</td><td><b>${esc(x.supplier)}</b><br><small>Bill ${esc(x.billNo)}${x.passenger ? ' · ' + esc(x.passenger) : ''}</small></td><td class="n">${f(x.total)}</td><td class="act"><button onclick="tab='bills';makeSale(${x.id})">Create sales bill</button></td></tr>`).join('')}</tbody></table></div></div>` : ''}`;
+    return `<div class="actbar" style="margin:0 0 12px"><button class="p" onclick="newPay()">+ New payment</button></div>
+      <div class="vat"><div><span>Total receivable from customers</span><b>${f(tot)}</b></div><div><span>Customers with dues</span><b>${dues}</b></div><div><span>Advances / overpaid</span><b>${f(adv)}</b></div></div>
+      <div class="md"><div class="card lc"><div class="ch"><h2>Customers</h2></div><input type="search" placeholder="Search customer" oninput="filt(this,'cbody')" style="margin-bottom:10px">
+        <label class="chk" style="margin-bottom:12px"><input type="checkbox" ${window.onlyDue ? 'checked' : ''} onchange="window.onlyDue=this.checked;render()"> Only customers with dues</label>
+        <div class="tw"><table><tbody id="cbody">${rows || '<tr><td class="empty" colspan="2">No customers yet. They appear when you save a bill, or add them under Parties.</td></tr>'}</tbody></table></div></div>
+      <div>${detail}</div></div>`; },
+  pay: () => { const R = D.payables, key = x => String(x || '').trim().toLowerCase(), sel = R.find(c => key(c.name) == key(window.pys)), er = window.pye, today = ymd(),
+      pre = er ? {date: er.date, bs: er.bs, amount: er.pmt.amount, mode: er.pmt.mode, account: er.pmt.splits ? er.pmt.splits[0].account : er.pmt.account, instrument: er.pmt.splits ? er.pmt.splits[0].instrument : er.pmt.instrument, more: er.pmt.splits ? er.pmt.splits.slice(1) : [], billId: er.pmt.billId, note: er.pmt.note, payee: er.pmt.payee, debit: er.pmt.debitAccount, fee: er.pmt.fee} : (window.pyp || {}),
+      inp = (id, l, v = '', x = '', c = '') => `<label class="${c}">${l}<input id="${id}" value="${esc(v)}" ${x}></label>`, ca = cashAccs(), dflt = pre.account || (ca.find(a => /cash/i.test(a.name)) || ca[0] || {}).code,
+      q = (...a) => esc(a.join(' ').toLowerCase()), pos = x => Math.max(x, 0), bal = n => f(Math.abs(n)) + (n >= 0 ? ' Cr' : ' Dr'),
+      tot = R.reduce((t, c) => t + pos(c.balance), 0), adv = R.reduce((t, c) => t + pos(-c.balance), 0), dues = R.filter(c => c.balance > .004).length,
+      state = c => c.balance > .004 ? '<span class="chip due">Payable</span>' : c.balance < -.004 ? '<span class="chip">Advance paid</span>' : c.billed ? '<span class="chip ok">Settled</span>' : '',
+      stChip = b => b.status == 'Paid' ? '<span class="chip ok">Paid</span>' : b.status == 'Partial' ? '<span class="chip due">Part paid</span>' : '<span class="chip due">Unpaid</span>',
+      modeSel = `<label>Mode<select id="ymo" onchange="ymode()">${MODES.map(m => `<option ${m == pre.mode ? 'selected' : ''}>${m}</option>`).join('')}</select></label><label id="yfw" ${pre.mode == 'Fonepay' ? '' : 'hidden'}>Fonepay charge<input id="yfe" type="number" step="any" value="${pre.fee ?? ''}" placeholder="0.00"></label>`,
+      fromSel = `<label>Paid from<select id="yac">${ca.map(a => `<option value="${a.code}" ${a.code == dflt ? 'selected' : ''}>${esc(a.name)}</option>`).join('')}</select></label>`;
+    const rows = R.map((c, i) => ({c, i})).filter(({c}) => !window.onlyDueP || c.balance > .004).map(({c, i}) => `<tr class="click ${sel && key(sel.name) == key(c.name) ? 'sel' : ''}" data-q="${q(c.name, c.pan)}" onclick="pickSup(${i})"><td><b>${esc(c.name)}</b><br>${state(c)}</td><td class="n">${c.balance > .004 ? f(c.balance) : c.balance < -.004 ? f(-c.balance) + ' adv.' : '—'}</td></tr>`).join('');
+    const credAccs = D.accounts.filter(a => !ca.some(c => c.code == a.code) && a.group != 'Sundry Creditors'), groups = [...new Set(credAccs.map(a => a.group))],
+      newForm = () => `<div class="card" id="sdet"><div class="ch"><h2>${er ? 'Edit payment ' + esc(er.no) : 'New payment made'}</h2></div>
+        <p class="sub"><small>Use this for money paid to someone who is not a recorded supplier, or paid through another party. Choose what it should be charged to: a supplier's account (type the name; a new supplier is added automatically), or any other account such as an advance, an expense or a loan.</small></p>
+        <div class="row">${inp('ypy', 'Paid to (payee)', pre.payee, 'placeholder="e.g. Himalayan Hotel Pvt. Ltd."', 'w2')}
+          <label class="w2">Charge to<select id="ycr" onchange="ycrChg()"><option value="">A supplier's account</option>${groups.map(g => `<optgroup label="${esc(g)}">${credAccs.filter(a => a.group == g).map(a => `<option value="${a.code}" ${a.code == pre.debit ? 'selected' : ''}>${esc(a.name)}</option>`).join('')}</optgroup>`).join('')}</select></label>
+          <label class="w4" id="ycnw" ${pre.debit ? 'hidden' : ''}>Supplier name<input id="ycn" list="pls" value="${esc(er && !pre.debit ? er.pmt.supplier : '')}" placeholder="Whose bills is this payment for?"></label>
+          <label>Date (AD)<input type="date" id="ydt" value="${pre.date || today}"></label>${inp('ybs', 'Date (BS)', pre.bs)}${inp('yam', 'Amount paid', pre.amount, 'type="number" step="any" oninput="spSum()"')}
+          ${modeSel}${fromSel}${inp('yin', 'Cheque no. / Transaction ID', pre.instrument, `oninput="chqPick('yin','yac','ymo')"`)}${inp('ynt', 'Note (optional)', pre.note, '', 'w2')}</div>
+        ${splitBox(pre)}
+        <div class="actbar"><button class="p" onclick="savePayment(true)">${er ? 'Update payment' : 'Save payment'}</button><button onclick="window.pye=null;window.pyn=false;render()">Cancel</button></div></div>`,
+      others = D.vouchers.filter(v => v.pmt && v.pmt.other).sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id),
+      otherCard = !others.length ? '' : `<div class="card"><div class="ch"><h2>Other payments made</h2><span class="sub" style="margin:0">Not to a recorded supplier</span></div><div class="tw"><table><thead><tr><th>Date</th><th>Voucher</th><th>Paid to</th><th>Charged to</th><th>Mode</th><th>Paid from</th><th class="n">Amount</th><th></th></tr></thead><tbody>${others.map(v => { const ac = D.accounts.find(a => a.code == v.pmt.debitAccount); return `<tr><td>${v.date}${v.bs ? '<br><small>' + esc(v.bs) + '</small>' : ''}</td><td><b>${v.no}</b>${v.ref ? '<br><small>' + esc(v.ref) + '</small>' : ''}</td><td>${esc(v.pmt.payee)}${v.pmt.note ? '<br><small>' + esc(v.pmt.note) + '</small>' : ''}</td><td>${esc(ac ? ac.name : v.pmt.debitAccount)}</td><td>${esc(v.pmt.mode)}</td><td>${esc(payFromName(v.pmt) || v.pmt.account)}</td><td class="n">${f(v.pmt.amount)}</td><td class="act"><a href="#" onclick="getFile('/api/xlsx/voucher/${v.id}');return false">Excel</a> <button onclick="editV(${v.id})">Edit</button> <button class="d" onclick="del(${v.id})">Delete</button></td></tr>`; }).join('')}</tbody></table></div></div>`;
+    const detail = window.pyn ? newForm() : !sel ? '<div class="card"><p class="sub" style="margin:0">Pick a supplier on the left to see their statement and record a payment, or use <b>New payment</b> for money paid to someone who is not a recorded supplier.</p></div>' : `
+      <div class="card" id="sdet"><div class="ch"><h2>${esc(sel.name)}</h2>${sel.pan ? `<span class="chip">PAN/VAT ${esc(sel.pan)}</span>` : ''}${state(sel)}</div>
+        <div class="vat" style="margin:0"><div><span>Billed by supplier</span><b>${f(sel.billed)}</b></div><div><span>Paid</span><b>${f(sel.paid)}</b></div><div class="net"><span>${sel.balance < -.004 ? 'Advance / overpaid' : 'Still payable'}</span><b>${f(Math.abs(sel.balance))}</b></div></div></div>
+      <div class="card"><div class="ch"><h2>${er ? 'Edit payment ' + esc(er.no) : 'Record payment made'}</h2></div>
+        <div class="row"><label>Date (AD)<input type="date" id="ydt" value="${pre.date || today}"></label>${inp('ybs', 'Date (BS)', pre.bs)}${inp('yam', 'Amount paid', pre.amount, 'type="number" step="any" oninput="spSum()"')}
+          ${modeSel}${fromSel}${inp('yin', 'Cheque no. / Transaction ID', pre.instrument, `oninput="chqPick('yin','yac','ymo')"`)}
+          <label>Against bill<select id="ybl"><option value="">Auto (oldest bill first)</option>${sel.bills.filter(b => b.due > .004 || b.id == pre.billId).map(b => `<option value="${b.id}" ${b.id == pre.billId ? 'selected' : ''}>${esc(b.billNo)} · ${b.date} · due ${f(b.due)}</option>`).join('')}</select></label>${inp('ynt', 'Note (optional)', pre.note, '', 'w2')}</div>
+        ${splitBox(pre)}
+        <p class="sub" style="margin:8px 0 0"><small>The amount can be less than what is owed. A part payment leaves the bill as "Part paid" with the balance still due, and a payment larger than one bill carries over to the next oldest bill.</small></p>
+        <div class="actbar"><button class="p" onclick="savePayment(false)">${er ? 'Update payment' : 'Save payment'}</button>${er ? '<button onclick="window.pye=null;render()">Cancel</button>' : ''}</div></div>
+      <div class="card"><div class="ch"><h2>Bills</h2></div><div class="tw"><table><thead><tr><th>Date</th><th>Bill no.</th><th class="n">Total</th><th class="n">Paid</th><th class="n">Due</th><th>Status</th><th></th></tr></thead><tbody>${sel.bills.map(b => `<tr><td>${b.date}</td><td><b>${esc(b.billNo)}</b></td><td class="n">${f(b.total)}</td><td class="n">${f(b.paid)}</td><td class="n">${f(b.due)}</td><td>${stChip(b)}</td><td class="act">${b.due > .004 ? `<button onclick="paySupBill(${b.id}, ${b.due})">Pay</button>` : ''}</td></tr>`).join('') || '<tr><td class="empty" colspan="7">No purchase bills for this supplier yet.</td></tr>'}</tbody></table></div></div>
+      <div class="card"><div class="ch"><h2>Statement</h2></div><div class="tw"><table><thead><tr><th>Date</th><th>Voucher</th><th>Particulars</th><th class="n">Billed (Cr)</th><th class="n">Paid (Dr)</th><th class="n">Balance</th><th></th></tr></thead><tbody>${sel.statement.map(x => `<tr><td>${x.date}${x.bs ? '<br><small>' + esc(x.bs) + '</small>' : ''}</td><td><b>${x.no}</b>${x.ref ? '<br><small>' + esc(x.ref) + '</small>' : ''}</td><td>${esc(x.narration)}${x.pmt ? paidFrom(x.vid) : ''}</td><td class="n">${x.cr ? f(x.cr) : ''}</td><td class="n">${x.dr ? f(x.dr) : ''}</td><td class="n">${bal(x.bal)}</td>
+        <td class="act">${x.pmt ? `<a href="#" onclick="getFile('/api/xlsx/voucher/${x.vid}');return false">Excel</a> <button onclick="editV(${x.vid})">Edit</button> <button class="d" onclick="del(${x.vid})">Delete</button>` : x.billId ? `<a href="#" onclick="getFile('/api/xlsx/bill/${x.billId}');return false">Bill Excel</a> <button onclick="editBill(${x.billId})">Edit bill</button>` : `<button onclick="editV(${x.vid})">Edit</button>`}</td></tr>`).join('') || '<tr><td class="empty" colspan="7">Nothing yet.</td></tr>'}</tbody></table></div></div>`;
+    return `<div class="actbar" style="margin:0 0 12px"><button class="p" onclick="newPaid()">+ New payment</button></div>
+      <div class="vat"><div><span>Total payable to suppliers</span><b>${f(tot)}</b></div><div><span>Suppliers with dues</span><b>${dues}</b></div><div><span>Advances / overpaid</span><b>${f(adv)}</b></div></div>
+      <div class="md"><div class="card lc"><div class="ch"><h2>Suppliers</h2></div><input type="search" placeholder="Search supplier" oninput="filt(this,'sbody2')" style="margin-bottom:10px">
+        <label class="chk" style="margin-bottom:12px"><input type="checkbox" ${window.onlyDueP ? 'checked' : ''} onchange="window.onlyDueP=this.checked;render()"> Only suppliers with dues</label>
+        <div class="tw"><table><tbody id="sbody2">${rows || '<tr><td class="empty" colspan="2">No suppliers yet. They appear when you save a purchase bill, or add them under Parties.</td></tr>'}</tbody></table></div></div>
+      <div>${detail}</div></div>`; },
+  reg: () => { const rows = k => D.bills.filter(b => b.kind == k && b.date >= FR() && b.date <= TO()).sort((a, b) => a.date.localeCompare(b.date) || String(a.billNo).localeCompare(String(b.billNo), undefined, {numeric: true}));
+    const sum = (R, k) => rd(R.reduce((s, b) => s + b[k], 0)), PR = rows('purchase'), SR = rows('sales');
+    const mk = (kind, title, R) => { const P = kind == 'purchase', noBs = R.filter(b => !b.bs).length;
+      return `<div class="card"><div class="ch"><h2>${title}</h2>${noBs ? `<span class="err">${noBs} bill(s) have no BS date, so the AD date is shown in the register.</span>` : ''}<button class="p sp" onclick="getFile('/api/xlsx/register/${kind}?from=${FR()}&to=${TO()}')">Download Excel</button></div>
+      <div class="tw"><table><tr><th>Miti</th><th>Bill no.</th><th>${P ? 'Supplier' : 'Buyer'}</th><th>PAN</th><th>Particulars</th><th class="n">Total</th><th class="n">Exempt</th><th class="n">Taxable</th><th class="n">VAT</th></tr>` +
+      R.map(b => `<tr><td>${esc(b.bs || b.date)}</td><td>${esc(b.billNo)}</td><td>${esc(P ? b.supplier : b.customer)}</td><td>${esc(P ? b.supplierPan : b.customerVat)}</td><td>${esc(b.particulars)}</td><td class="n">${f(b.total)}</td><td class="n">${f(b.nonTax)}</td><td class="n">${f(b.taxable)}</td><td class="n">${f(b.vat)}</td></tr>`).join('') +
+      `<tr class="t"><td colspan="5">Total</td><td class="n">${f(sum(R, 'total'))}</td><td class="n">${f(sum(R, 'nonTax'))}</td><td class="n">${f(sum(R, 'taxable'))}</td><td class="n">${f(sum(R, 'vat'))}</td></tr></table></div></div>`; };
+    const o = sum(SR, 'vat'), i = sum(PR, 'vat');
+    return `<div class="vat"><div><span>Output VAT (sales)</span><b>${f(o)}</b></div><div><span>Input VAT (purchases)</span><b>${f(i)}</b></div><div class="net"><span>VAT for this period: ${o >= i ? 'payable' : 'credit carried forward'}</span><b>${f(o - i)}</b></div></div>` +
+      mk('purchase', 'Purchase book (खरिद खाता)', PR) + mk('sales', 'Sales book (बिक्री खाता)', SR); },
+  bills: () => { const s = window.sp || {}, e = window.eb || {}, ek = e.kind, pe = ek == 'purchase' ? e : {}, so = ek == 'sales' ? e : s, today = ymd(), bt = window.bt || 'purchase', inp = (id, l, v = '', x = '', c = '') => `<label class="${c}">${l}<input id="${id}" value="${esc(v)}" ${x}></label>`;
+    const catSel = (id, v) => `<label>Category<select id="${id}">${[...D.settings.categories, ...(v && !D.settings.categories.includes(v) ? [v] : [])].map(c => `<option ${c == v ? 'selected' : ''}>${esc(c)}</option>`).join('')}</select></label>`, P = D.bills.filter(b => b.kind == 'purchase').reverse(), S = D.bills.filter(b => b.kind == 'sales').reverse(), nx = 'type="number" step="any"';
+    const q = (...a) => esc(a.join(' ').toLowerCase()), pst = {}; D.receivables.forEach(c => c.bills.forEach(x => pst[x.id] = x));
+    const payChip = id => { const x = pst[id]; return !x ? '' : x.status == 'Paid' ? '<span class="chip ok">Paid</span>' : x.status == 'Partial' ? '<span class="chip due">Part paid · due ' + f(x.due) + '</span>' : '<span class="chip due">Unpaid</span>'; };
+    return `<div id="bw" data-k="${bt}"><div class="seg"><button data-k="purchase" class="${bt == 'purchase' ? 'on' : ''}" onclick="setBt('purchase')">Purchase bills<i>${P.length}</i></button><button data-k="sales" class="${bt == 'sales' ? 'on' : ''}" onclick="setBt('sales')">Sales bills<i>${S.length}</i></button></div>
+
+    <div class="pane-p">${ek == 'purchase' ? `<div class="note">Editing purchase bill <b>${esc(e.billNo)}</b> (${esc(e.voucher)}). Saving updates its journal voucher, the ledgers, the reports and the Excel files.${e.sold ? ' A sales bill (' + esc(e.sold) + ') was already made from it; that sales bill is not changed.' : ''}</div>` : ''}<div class="split"><div class="card">
+      <div class="fh">Supplier and customer</div><div class="row">${inp('ps', 'Supplier (pick or type new)', pe.supplier, 'list="pls" onchange="fillParty(\'ps\',\'ppan\')"', 'w2')}${inp('ppan', 'Supplier PAN/VAT no.', pe.supplierPan)}${inp('pc', 'Customer (bill to)', pe.customer, 'list="plc"', 'w2')}${inp('pp', 'Passenger name', pe.passenger)}</div>
+      <div class="fh">Bill</div><div class="row">${inp('pb', 'Supplier bill no.', pe.billNo)}${catSel('pcat', pe.category)}<label>Date (AD)<input type="date" id="pd" value="${pe.date || today}"></label>${inp('pbs', 'Date (BS)', pe.bs)}</div>
+      <div class="fh">Charges</div><div class="row">${inp('pi', 'Particulars (route, ticket no., hotel...)', pe.particulars, '', 'w4')}${inp('pn', 'Non-taxable', pe.nonTax, nx + ' oninput="pcalc()"')}${inp('pt', 'Taxable', pe.taxable, nx + ' oninput="pcalc()"')}${inp('pv', 'VAT 13% (as on bill)', pe.vat, nx + ' oninput="pcalc()"')}</div>
+    </div>
+    <aside class="stub"><div class="hd">Purchase bill</div><div class="bd"><dl><dt>Non-taxable</dt><dd id="pnv"></dd><dt>Taxable</dt><dd id="ptv"></dd><dt>VAT 13%</dt><dd id="pvv"></dd></dl>
+      <div class="tt"><span>Total</span><b id="ptot"></b></div>${ek == 'purchase' ? '<button class="p wide" onclick="savePurchase()">Update purchase bill</button><button class="wide" onclick="cancelEdit()">Cancel</button>' : '<button class="p wide" onclick="savePurchase()">Save as journal voucher</button>'}</div></aside></div>
+
+</div>
+
+    <div class="pane-s">${ek == 'sales' ? `<div class="note">Editing sales bill <b>${esc(e.billNo)}</b> (${esc(e.voucher)}). Saving updates its sales voucher, the customer's account, the reports and the invoice Excel.</div>` : ''}${s.id ? `<div class="note">Creating a sales bill from purchase bill <b>${esc(s.billNo)}</b> (${esc(s.supplier)}). The amounts below are filled in for you.</div>` : ''}<div class="split"><div class="card">
+      <div class="fh">Customer</div><div class="row">${inp('sc', 'Customer (M/S)', so.customer, 'list="plc" onchange="fillParty(\'sc\',\'sv\')"', 'w2')}${inp('sv', "Buyer's VAT/PAN no.", ek == 'sales' ? e.customerVat : '')}${inp('sp2', 'Passenger', so.passenger)}${ek == 'sales' ? '' : `<label class="w2">From purchase bill (optional)<select id="spb" onchange="pickPurchase(this.value)"><option value="">None, enter manually</option>${D.bills.filter(b => b.kind == 'purchase' && (!b.sold || b.id == s.id)).reverse().map(b => `<option value="${b.id}" ${b.id == s.id ? 'selected' : ''}>${esc(b.supplier)} · ${esc(b.billNo)} · ${f(b.total)}</option>`).join('')}</select></label>`}</div>
+      <div class="fh">Bill</div><div class="row">${catSel('sct', so.category)}${ek == 'sales' ? inp('sbn', 'Bill no.', e.billNo) : ''}<label>Date (AD)<input type="date" id="sd" value="${ek == 'sales' ? e.date : today}"></label>${inp('sbs', 'Date (BS)', ek == 'sales' ? e.bs : '')}${inp('si', 'Particulars', so.particulars, '', 'w4')}</div>
+      <div class="fh">Amounts</div><div class="row">${inp('sn', 'Non-taxable', so.nonTax, nx + ' oninput="scalc(this.id)"')}${inp('sb', 'Purchase total', s.total, nx + ' oninput="scalc(this.id)"')}${inp('sm', 'Markup %', 15, nx + ' oninput="scalc(this.id)"')}${inp('st', 'Bill total', ek == 'sales' ? e.total : '', nx + ' oninput="scalc(this.id)"')}</div>
+    </div>
+    <aside class="stub"><div class="hd">Sales bill (VAT invoice)</div><div class="bd"><div id="sbd"></div>${ek == 'sales' ? '<button class="p wide" onclick="saveSale()">Update sales bill</button><button class="wide" onclick="cancelEdit()">Cancel</button>' : '<button class="p wide" onclick="saveSale()">Save &amp; download Excel</button><button class="wide" onclick="window.sp=null;render()">Clear</button>'}</div></aside></div>
+
+</div></div>`; },
+
+  voucher: () => { const ev = window.ev || {}; return `${window.ev ? `<div class="note">Editing <b>${esc(ev.no)}</b>. Saving updates the ledgers and reports. The voucher number and type stay the same.</div>` : ''}<div class="card"><div class="row">
+   <label>Type<select id="vt" ${window.ev ? 'disabled' : ''}>${['Journal','Payment','Receipt','Purchase','Sales','Contra'].map(t => `<option ${t == ev.type ? 'selected' : ''}>${t}</option>`).join('')}</select></label>
+   <label>Date (AD)<input type="date" id="vd" value="${ev.date || ymd()}"></label>
+   <label>Date (BS, optional)<input id="vb" placeholder="2083-06-30" value="${esc(ev.bs)}"></label>
+   <label>Bill / Ref no.<input id="vr" value="${esc(ev.ref)}"></label><label class="w4">Narration<input id="vn" value="${esc(ev.narration)}"></label></div></div>
+   <div class="card"><div class="tw" style="margin-bottom:0"><table><thead><tr><th>Account</th><th class="n" style="width:170px">Debit</th><th class="n" style="width:170px">Credit</th><th style="width:44px"></th></tr></thead><tbody id="ls"></tbody></table></div>
+   <div style="margin-top:14px"><button onclick="addLine()">+ Add line</button></div></div>
+   <div class="bar"><span id="tot"></span><span class="sp"><span id="msg"></span> ${window.ev ? '<button onclick="window.ev=null;render()">Cancel</button> ' : ''}<button class="p" onclick="save()">${window.ev ? 'Update voucher' : 'Save voucher'}</button></span></div>`; },
+  daybook: () => `<div class="card"><div class="tw"><table><tr><th>Date</th><th>Voucher</th><th>Particulars</th><th class="n">Debit</th><th class="n">Credit</th><th></th></tr>` +
+    (D.vouchers.filter(v => per(v.date)).sort((a,b) => a.date.localeCompare(b.date) || a.id - b.id).map(v =>
+      v.lines.map((l,i) => `<tr class="${i ? '' : 'vs'}"><td>${i ? '' : v.date + (v.bs ? '<br><small>' + esc(v.bs) + '</small>' : '')}</td><td>${i ? '' : '<b>' + v.no + '</b>' + (v.ref ? '<br><small>' + esc(v.ref) + '</small>' : '')}</td>
+      <td>${esc(nm(l.account))}${i == v.lines.length - 1 && v.narration ? '<br><small><i>' + esc(v.narration) + '</i></small>' : ''}</td>
+      <td class="n">${l.dr ? f(l.dr) : ''}</td><td class="n">${l.cr ? f(l.cr) : ''}</td><td class="act">${i ? '' : `<a href="#" onclick="getFile('/api/xlsx/voucher/${v.id}');return false">Excel</a> <button onclick="editV(${v.id})">Edit</button> <button class="d" onclick="del(${v.id})">Delete</button>`}</td></tr>`).join('')).join('') || '<tr><td class="empty" colspan="6">No vouchers in this period.</td></tr>') + '</table></div></div>',
+  ledger: () => { const c = window.lc || D.accounts[0].code, a = acc(c), isB = 'ALE'.includes(a.type);
+    let run = isB ? net(c, pre) : 0; const open = run;
+    const items = D.vouchers.filter(v => per(v.date)).sort((x,y) => x.date.localeCompare(y.date) || x.id - y.id).flatMap(v => v.lines.filter(l => l.account == c).map(l => ({v, l})));
+    const bal = n => f(Math.abs(n)) + (n >= 0 ? ' Dr' : ' Cr');
+    return `<div class="card"><div class="row" style="grid-template-columns:minmax(220px,420px)"><label>Account<select onchange="lc=this.value;render()">${D.accounts.map(x => `<option value="${x.code}" ${x.code == c ? 'selected' : ''}>${x.code} ${esc(x.name)}</option>`).join('')}</select></label></div></div>
+    <div class="card"><div class="tw"><table><tr><th>Date</th><th>Voucher</th><th>Narration</th><th class="n">Debit</th><th class="n">Credit</th><th class="n">Balance</th></tr>
+    <tr class="grp"><td colspan="5">Opening balance</td><td class="n">${bal(open)}</td></tr>` + items.map(({v,l}) => { run += l.dr - l.cr;
+      return `<tr><td>${v.date}</td><td>${v.no}</td><td>${esc(v.narration)}</td><td class="n">${l.dr ? f(l.dr) : ''}</td><td class="n">${l.cr ? f(l.cr) : ''}</td><td class="n">${bal(run)}</td></tr>`; }).join('') +
+      `<tr class="t"><td colspan="5">Closing balance</td><td class="n">${bal(run)}</td></tr></table></div></div>`; },
+  tb: () => { let dr = 0, cr = 0; const p = priorPL();
+    const r = ofType('ALEIX').map(a => ({a, v: closing(a)})).filter(x => Math.abs(x.v) > .004);
+    if (Math.abs(p) > .004) r.push({a: {code: '', name: "Prior years' profit/(loss) carried forward"}, v: p});
+    return `<p class="sub">As at ${TO()}</p>${dl('tb')}<div class="card sheet"><div class="tw"><table><tr><th>Account</th><th class="n">Debit</th><th class="n">Credit</th></tr>` + r.map(x => { x.v > 0 ? dr += x.v : cr -= x.v;
+      return `<tr><td>${x.a.code} ${esc(x.a.name)}</td><td class="n">${x.v > 0 ? f(x.v) : ''}</td><td class="n">${x.v < 0 ? f(-x.v) : ''}</td></tr>`; }).join('') +
+      `<tr class="t"><td>Total ${Math.abs(dr - cr) < .005 ? '<span class="ok">✓ tallies</span>' : '<span class="err">(does not tally)</span>'}</td><td class="n">${f(dr)}</td><td class="n">${f(cr)}</td></tr></table></div></div>`; },
+  pl: () => { const inc = section('Income', ofType('I'), -1), dc = section('Direct Costs', ofType('X').filter(a => a.group == 'Direct Costs'), 1),
+      op = section('Operating Expenses', ofType('X').filter(a => a.group != 'Direct Costs'), 1), gp = inc.tot - dc.tot;
+    return `<p class="sub">${FR()} to ${TO()}</p>${dl('pl')}${collected()}<div class="card sheet"><div class="tw"><table>${inc.h}<tr class="t"><td>Total Income</td><td class="n">${f(inc.tot)}</td></tr>${dc.h}
+    <tr class="t"><td>Gross Profit</td><td class="n">${f(gp)}</td></tr>${op.h}<tr class="t"><td>Total Operating Expenses</td><td class="n">${f(op.tot)}</td></tr>
+    <tr class="t"><td>Net Profit / (Loss)</td><td class="n">${f(gp - op.tot)}</td></tr></table></div></div>`; },
+  bs: () => { const A = section('Assets', ofType('A'), 1), L = section('Liabilities', ofType('L'), -1), E = section('Equity', ofType('E'), -1);
+    const cur = -ofType('IX').reduce((s,a) => s + net(a.code, per), 0), pr = -priorPL(), eq = E.tot + cur + pr, rhs = L.tot + eq;
+    return `<p class="sub">As at ${TO()}</p>${dl('bs')}<div class="card sheet"><div class="tw"><table>${A.h}<tr class="t"><td>Total Assets</td><td class="n">${f(A.tot)}</td></tr>${L.h}
+    <tr class="t"><td>Total Liabilities</td><td class="n">${f(L.tot)}</td></tr>${E.h}<tr><td class="ind">Prior years' profit/(loss)</td><td class="n">${f(pr)}</td></tr>
+    <tr><td class="ind">Current period profit/(loss)</td><td class="n">${f(cur)}</td></tr><tr class="t"><td>Total Equity</td><td class="n">${f(eq)}</td></tr>
+    <tr class="t"><td>Total Liabilities + Equity ${Math.abs(A.tot - rhs) < .005 ? '<span class="ok">✓ matches assets</span>' : '<span class="err">(does not match assets)</span>'}</td><td class="n">${f(rhs)}</td></tr></table></div></div>`; },
+  coa: () => `<div class="card"><div class="row" style="grid-template-columns:100px minmax(180px,1fr) 150px minmax(180px,1fr) auto"><label>Code<input id="ac1"></label><label>Name<input id="ac2"></label>
+    <label>Type<select id="ac3"><option value="A">Asset</option><option value="L">Liability</option><option value="E">Equity</option><option value="I">Income</option><option value="X">Expense</option></select></label>
+    <label>Group<input id="ac4" placeholder="e.g. Current Assets"></label><button class="p" onclick="addAcc()">Add account</button></div></div>
+    <div class="card"><div class="tw"><table><tr><th>Code</th><th>Name</th><th>Type</th><th>Group</th><th></th></tr>${D.accounts.map(a => `<tr><td>${a.code}</td><td>${esc(a.name)}</td><td>${{A:'Asset',L:'Liability',E:'Equity',I:'Income',X:'Expense'}[a.type] || a.type}</td><td>${esc(a.group)}</td><td class="act">${D.vouchers.some(v => v.lines.some(l => l.account == a.code)) ? '' : `<button class="d" onclick="delAcc('${a.code}')">Delete</button>`}</td></tr>`).join('')}</table></div></div>`
+};
+// ---- Collapsible sidebar: wide screens remember the choice; narrow screens start collapsed ----
+const NARROW = matchMedia('(max-width:1180px)');
+let sideTmp = null; // temporary choice on a narrow screen (not remembered)
+const sideStore = { get() { try { return localStorage.getItem('sideCollapsed') === '1'; } catch (e) { return false; } },
+  set(v) { try { localStorage.setItem('sideCollapsed', v ? '1' : '0'); } catch (e) {} } };
+function applySide() {
+  const c = NARROW.matches ? (sideTmp ?? true) : sideStore.get(), b = $('#sbtog'), lbl = c ? 'Expand menu' : 'Collapse menu';
+  document.querySelector('.app').classList.toggle('sc', c);
+  b.setAttribute('aria-expanded', String(!c)); b.title = lbl; b.setAttribute('aria-label', lbl);
+}
+function toggleSide() { const c = document.querySelector('.app').classList.contains('sc'); if (NARROW.matches) sideTmp = !c; else sideStore.set(!c); applySide(); }
+NARROW.addEventListener('change', () => { sideTmp = null; applySide(); });
+applySide();
+
+// ---- Scrollbar above any table wider than its card, mirrored with the one below ----
+const twRO = new ResizeObserver(es => es.forEach(e => syncTW(e.target.closest('.tw'))));
+function syncTW(tw) {
+  if (!tw || !tw.isConnected) return;
+  let bar = tw.previousElementSibling;
+  if (!bar || !bar.classList.contains('tws')) {
+    bar = document.createElement('div'); bar.className = 'tws'; bar.hidden = true; bar.setAttribute('aria-hidden', 'true'); bar.innerHTML = '<div></div>'; tw.before(bar);
+    bar.addEventListener('scroll', () => { if (Math.abs(tw.scrollLeft - bar.scrollLeft) >= 1) tw.scrollLeft = bar.scrollLeft; });
+    tw.addEventListener('scroll', () => { if (Math.abs(tw.scrollLeft - bar.scrollLeft) >= 1) bar.scrollLeft = tw.scrollLeft; });
+    twRO.observe(tw); const t = tw.querySelector('table'); if (t) twRO.observe(t);
+  }
+  const wide = tw.scrollWidth > tw.clientWidth + 1; bar.hidden = !wide;
+  if (wide) { bar.firstChild.style.width = tw.scrollWidth + 'px'; bar.scrollLeft = tw.scrollLeft; }
+}
+let twQueued = false;
+const syncAllTW = () => { if (twQueued) return; twQueued = true; requestAnimationFrame(() => { twQueued = false; document.querySelectorAll('#m .tw').forEach(syncTW); }); };
+new MutationObserver(syncAllTW).observe($('#m'), {childList: true, subtree: true});
+addEventListener('resize', syncAllTW);
+const t = new Date(), y = t.getMonth() > 5 && !(t.getMonth() == 6 && t.getDate() < 16) ? t.getFullYear() : t.getFullYear() - 1; // Shrawan 1 ≈ Jul 16
+$('#from').value = y + '-07-16'; $('#to').value = (y + 1) + '-07-15'; load();
+</script></body></html>

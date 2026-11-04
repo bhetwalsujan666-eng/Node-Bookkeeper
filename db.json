@@ -1,0 +1,866 @@
+{
+ "version": 1,
+ "parties": [
+  {
+   "name": "Flight Destination Travels and Tours Pvt. Ltd.",
+   "type": "supplier",
+   "pan": "303810571",
+   "address": "Mitra Nagar, Gongabu, New Buspark",
+   "phone": "+977-1-4987299, 4970375",
+   "email": "flightdestination@gmail.com"
+  },
+  {
+   "name": "Chhaya Devi Complex Ltd.",
+   "type": "supplier",
+   "pan": "302816804",
+   "address": "Amrit Marg, Thamel, Kathmandu",
+   "phone": "+977-1-5252000",
+   "email": "reservation@aloftkathmanduthamel.com"
+  },
+  {
+   "name": "Bar Peepal Resort Pvt. Ltd.",
+   "type": "supplier",
+   "pan": "602926500",
+   "address": "Lakeside-26, Pokhara",
+   "phone": "+977-61590193",
+   "email": "info@barpeepalresort.com"
+  },
+  {
+   "name": "Om's Home Hotel Pvt. Ltd.",
+   "type": "supplier",
+   "pan": "622414197",
+   "address": "Jomsom, Marpha, Puthan",
+   "phone": "069-440042, 069-440051",
+   "email": "info@omshomejomsom.com"
+  },
+  {
+   "name": "Buddha Air Pvt. Ltd.",
+   "type": "supplier",
+   "pan": "500159293",
+   "address": "Jawalakhel, Lalitpur",
+   "phone": "+977-1-5421015",
+   "email": "info@buddhaair.com"
+  },
+  {
+   "name": "Akama Hotel Limited (Ramada)",
+   "type": "supplier",
+   "pan": "601872253",
+   "address": "Dhumbarahi, Kathmandu",
+   "phone": "+977-1-4377298",
+   "email": "info@ramadakathmandudhumbarahi.com"
+  },
+  {
+   "name": "Good Automobile Pvt. Ltd.",
+   "type": "supplier",
+   "pan": "604277114",
+   "address": "Dhumbarahi-4, Kathmandu",
+   "phone": "01-4009123, 01-4009124",
+   "email": ""
+  },
+  {
+   "name": "Radisson Hotel, Kathmandu",
+   "type": "supplier",
+   "pan": "300048719",
+   "address": "Lazimpat, Kathmandu",
+   "phone": "+977-1-4523888",
+   "email": "reservation@radkat.com.np"
+  },
+  {
+   "name": "Hotel Barahi Pvt. Ltd.",
+   "type": "supplier",
+   "pan": "601794670",
+   "address": "Lakeside, Pokhara",
+   "phone": "+977-061-450617",
+   "email": "info@barahi.com"
+  },
+  {
+   "name": "Hotel The Kantipur Pvt. Ltd.",
+   "type": "supplier",
+   "pan": "300012040",
+   "address": "Lakeside, Pokhara",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Sarangkot Mountain Resort & Spa Pvt. Ltd.",
+   "type": "supplier",
+   "pan": "603420481",
+   "address": "Sarangkot, Pokhara",
+   "phone": "+977-9856067928",
+   "email": "sarangkot@barahi.com"
+  },
+  {
+   "name": "Thamel Plaza Hotel & Suites Ltd.",
+   "type": "supplier",
+   "pan": "600415484",
+   "address": "Thamel, Kathmandu",
+   "phone": "+977-01-4700404",
+   "email": "reservations@ramadaencorekathmandu.com"
+  },
+  {
+   "name": "Kairos Travel and Tour Pvt. Ltd.",
+   "type": "supplier",
+   "pan": "606624938",
+   "address": "Soalteemode, Bafal, Kathmandu",
+   "phone": "01-5924444",
+   "email": "01-5925555"
+  },
+  {
+   "name": "Gokarna Forest Resort Pvt. Ltd.",
+   "type": "supplier",
+   "pan": "300052772",
+   "address": "Gokarna, Thali, Kathmandu",
+   "phone": "+977-1-4451212",
+   "email": "info@gokarna.net"
+  },
+  {
+   "name": "Yak and Yeti Hotel Ltd.",
+   "type": "supplier",
+   "pan": "300047176",
+   "address": "Durbarmarg, Kathmandu",
+   "phone": "01-4248999, 01-4240520",
+   "email": "reservation@yakandyeti.com.np"
+  },
+  {
+   "name": "Hotel Marshyangdi",
+   "type": "supplier",
+   "pan": "300046096",
+   "address": "Thamel, Kathmandu",
+   "phone": "01-4700105, 01-4701008",
+   "email": "info@hotelmarshyangdi.com"
+  },
+  {
+   "name": "Gorkha International Travels Pvt. Ltd.",
+   "type": "supplier",
+   "pan": "301664026",
+   "address": "Thamel, Kathmandu",
+   "phone": "01-4700402, 01-4700541",
+   "email": ""
+  },
+  {
+   "name": "Aaja Travel Sewa (Pvt.) Ltd.",
+   "type": "supplier",
+   "pan": "",
+   "address": "Kageshwori- 8, Kathmandu",
+   "phone": "9851023344, 9705450988",
+   "email": "aajatravelsewa@gmail.com"
+  },
+  {
+   "name": "Balaju Auto Works Pvt. Ltd.",
+   "type": "supplier",
+   "pan": "300051470",
+   "address": "Balaju Industrial District",
+   "phone": "01-4950604, 01-4951097, 01-4970730",
+   "email": "bawaccount@agnigroup.com.np"
+  },
+  {
+   "name": "Hotel Harmika",
+   "type": "supplier",
+   "pan": "602835369",
+   "address": "Bouddha - 6, Kathmandu",
+   "phone": "+977-1-5918150",
+   "email": "info@hotelharmika.com"
+  },
+  {
+   "name": "Hotel Shanker",
+   "type": "supplier",
+   "pan": "302673553",
+   "address": "Lazimpat, Kathmandu",
+   "phone": "01-4510151/152",
+   "email": "accounts@shankerhotel.com"
+  },
+  {
+   "name": "Travel Click Travels & Tours Pvt. Ltd.",
+   "type": "supplier",
+   "pan": "609688892",
+   "address": "Kuleshwor, Kathmandu",
+   "phone": "9803400114",
+   "email": ""
+  },
+  {
+   "name": "Himalayan Front Resort Pvt. Ltd.",
+   "type": "supplier",
+   "pan": "606512695",
+   "address": "Pokhara",
+   "phone": "9801166350, 9801166370, 9869840017",
+   "email": "reservation@himalayanfront.com"
+  },
+  {
+   "name": "Majestic Lake Front Hotel and Suites Pvt. Ltd.",
+   "type": "supplier",
+   "pan": "610208368",
+   "address": "Lakeside, Pokhara",
+   "phone": "061-591601",
+   "email": "info@majesticlakefront.com"
+  },
+  {
+   "name": "Patrick Chemla",
+   "type": "customer",
+   "pan": "",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Soaltee Westend (Hotel Peninsula Pvt. Ltd.)",
+   "type": "supplier",
+   "pan": "303440475",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Unknown",
+   "type": "customer",
+   "pan": "",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Barahi Resort Pvt. Ltd.",
+   "type": "supplier",
+   "pan": "302720060",
+   "address": "Meghauli, Chitwan",
+   "phone": "+977-9866300265",
+   "email": "bjl@barahi.com"
+  },
+  {
+   "name": "Roselyne Chemla",
+   "type": "customer",
+   "pan": "",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Sushant Kumar",
+   "type": "customer",
+   "pan": "",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Niranjan Sir",
+   "type": "customer",
+   "pan": "",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Sahu Subhangi",
+   "type": "customer",
+   "pan": "",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Permendra Kumar",
+   "type": "customer",
+   "pan": "",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Bhumika Sharma",
+   "type": "customer",
+   "pan": "",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Kiran (22 Pax)",
+   "type": "customer",
+   "pan": "",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Sahar Agarwal",
+   "type": "customer",
+   "pan": "",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "B Kaushik Ram",
+   "type": "customer",
+   "pan": "",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Behera K Prasanta",
+   "type": "customer",
+   "pan": "",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Shivam (Indian)",
+   "type": "customer",
+   "pan": "",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Kamath Manjunath Rame",
+   "type": "customer",
+   "pan": "",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Mahendra Ratna Tuladhar (Store)",
+   "type": "supplier",
+   "pan": "",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Pravin and Group (Kailash Veg Group)",
+   "type": "customer",
+   "pan": "",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Ashwin Kumar",
+   "type": "customer",
+   "pan": "",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Khurana Gujral Madhu",
+   "type": "customer",
+   "pan": "",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Janarthan Kumar Ashwin",
+   "type": "customer",
+   "pan": "",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Gaurav & Group",
+   "type": "customer",
+   "pan": "",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Lakshimi",
+   "type": "customer",
+   "pan": "",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Chhagan Singh",
+   "type": "customer",
+   "pan": "",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Dawa Sherpa (16 pax Ktm-Nepalgunj)",
+   "type": "customer",
+   "pan": "",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Sivananthan Thavavinayagam",
+   "type": "customer",
+   "pan": "",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Prakriti Gurung",
+   "type": "customer",
+   "pan": "",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Sivananthan Thavavinayagam, Lakshmishree Sivananthan",
+   "type": "customer",
+   "pan": "",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Kamal Gurung",
+   "type": "customer",
+   "pan": "",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "New Shilpa Udhyog",
+   "type": "supplier",
+   "pan": "301994947",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Tirtha Prasad Adhikari, Deepak Acharya, Shachitra Pokharel",
+   "type": "customer",
+   "pan": "",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Rabindra Ray, Ramesh Chandra Adhikari Pyashi, Karun Shrestha, Rajesh Kushwaha, Srijan Poudel",
+   "type": "customer",
+   "pan": "",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Palsi Thapa Magar",
+   "type": "customer",
+   "pan": "",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Keshav Kumar Sharma",
+   "type": "customer",
+   "pan": "",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Ram Chandra Shrestha",
+   "type": "customer",
+   "pan": "",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Keshav Gurung",
+   "type": "customer",
+   "pan": "",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Lakshmishree",
+   "type": "customer",
+   "pan": "",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Vipul Jugal Kishor Langelia",
+   "type": "customer",
+   "pan": "",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Dilip Kumar Jigar Acharya",
+   "type": "customer",
+   "pan": "",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Honey Rana",
+   "type": "customer",
+   "pan": "",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Jigar Acharya",
+   "type": "customer",
+   "pan": "",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "VIP Guest",
+   "type": "customer",
+   "pan": "",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Natarajan Nuthukkumarasamy",
+   "type": "customer",
+   "pan": "",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Subramanian Karunakaran",
+   "type": "customer",
+   "pan": "",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Ajay Lamichhane, Samir Baidya",
+   "type": "customer",
+   "pan": "",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Sajeet Kaur Santoo Singh",
+   "type": "customer",
+   "pan": "",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Bangawala Dalsukhbhai Koma",
+   "type": "customer",
+   "pan": "",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Prakash Shrestha",
+   "type": "customer",
+   "pan": "",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Dhurba Shrestha, Upendra Pyakurel, Bahadur Singh Lama Tamang",
+   "type": "customer",
+   "pan": "",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Indira Kumari Khadgi Shahi",
+   "type": "customer",
+   "pan": "",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Nirmal Kumar Shahi",
+   "type": "customer",
+   "pan": "",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Paras Chhetri",
+   "type": "customer",
+   "pan": "",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Pratik Shrestha",
+   "type": "customer",
+   "pan": "",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Sanjay Kachhapathi",
+   "type": "customer",
+   "pan": "",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Kumodh Dhungel",
+   "type": "customer",
+   "pan": "",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Kiya Bhattacharya",
+   "type": "customer",
+   "pan": "",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Ratha M. Ramah",
+   "type": "customer",
+   "pan": "",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Reema Karki Malla, Rosy Pradhanang Pradhan",
+   "type": "customer",
+   "pan": "",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Subhra Sankar Datta",
+   "type": "customer",
+   "pan": "",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Ram Maya Tamang, Dolma Sherpa",
+   "type": "customer",
+   "pan": "",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Astha Basnet",
+   "type": "customer",
+   "pan": "",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Pabitra Rai",
+   "type": "customer",
+   "pan": "",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Kalapataru Hotel and Kaushiki Banquet Pvt. Ltd.",
+   "type": "supplier",
+   "pan": "",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Agni Hire Purchase Pvt. Ltd.",
+   "type": "supplier",
+   "pan": "",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "NTNC",
+   "type": "supplier",
+   "pan": "",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Jayanti Oil Store",
+   "type": "supplier",
+   "pan": "300063688",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Shailung Khaja Ghar",
+   "type": "supplier",
+   "pan": "159667446",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Lazimpat Stationery",
+   "type": "supplier",
+   "pan": "302729890",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Pashupati Infosys Pvt. Ltd.",
+   "type": "supplier",
+   "pan": "606631064",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Hotel Taj Mahal",
+   "type": "supplier",
+   "pan": "",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Kuber Auto Works Pvt. Ltd.",
+   "type": "supplier",
+   "pan": "610024652",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Rajdhani Oil Store",
+   "type": "supplier",
+   "pan": "500014370",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Bhaktapur Fuel Center Pvt. Ltd.",
+   "type": "supplier",
+   "pan": "609525432",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Bastakoti Oil Center",
+   "type": "supplier",
+   "pan": "605073463",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Hari Petrol Pump Pvt. Ltd.",
+   "type": "supplier",
+   "pan": "604357957",
+   "address": "",
+   "phone": "",
+   "email": ""
+  },
+  {
+   "name": "Stupa Decor Pvt. Ltd.",
+   "type": "supplier",
+   "pan": "623612354",
+   "address": "",
+   "phone": "",
+   "email": ""
+  }
+ ],
+ "staff": [
+  {
+   "name": "Bishnu Raj Sharma"
+  },
+  {
+   "name": "Rabindra Khadka",
+   "designation": "",
+   "phone": ""
+  },
+  {
+   "name": "Mahesh Pandey"
+  },
+  {
+   "name": "Sashwot Kumal"
+  },
+  {
+   "name": "Kiran Pd. Kalauni"
+  },
+  {
+   "name": "Sabina Cleaner"
+  },
+  {
+   "name": "Ram Sir",
+   "designation": "CEO",
+   "phone": ""
+  }
+ ],
+ "banks": [
+  {
+   "name": "NIMB - 13201050024051",
+   "bank": "NIMB",
+   "account": "13201050024051",
+   "chequeFormat": "3043416xxx, 3024446xxx",
+   "ledger": "1011",
+   "linked": false
+  },
+  {
+   "name": "Everest Bank Ltd. - 01400105200648",
+   "bank": "Everest Bank Ltd.",
+   "account": "01400105200648",
+   "chequeFormat": "64395xxx, 34250xxx, 60657xxx, 62342xxx, 42083xxx, 56189xxx",
+   "ledger": "1012",
+   "linked": false
+  },
+  {
+   "name": "Himalayan Bank Ltd. - 01907318590019",
+   "bank": "Himalayan Bank Ltd.",
+   "account": "01907318590019",
+   "chequeFormat": "39622xxx",
+   "ledger": "1013",
+   "linked": false
+  },
+  {
+   "name": "Nepal SBI Bank Ltd. - 17725240200493",
+   "bank": "Nepal SBI Bank Ltd.",
+   "account": "17725240200493",
+   "chequeFormat": "40983xxx, 14837xxx, 32507xxx",
+   "ledger": "1014",
+   "linked": false
+  }
+ ]
+}

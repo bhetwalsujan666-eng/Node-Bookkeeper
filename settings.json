@@ -1,0 +1,33 @@
+{
+ "folder": "D:\\sujan new folder\\Experimental",
+ "auto": {
+  "jv": true,
+  "pv": true,
+  "pmv": true,
+  "stm": true,
+  "sv": true,
+  "rv": true,
+  "registers": true,
+  "tb": true,
+  "pl": true,
+  "bs": true
+ },
+ "company": {
+  "name": "Shivam Group Holiday Pvt. Ltd.",
+  "addr": "Lazimpat, Kathmandu, Nepal",
+  "tel": "977-1-4535752, 4535859",
+  "email": "shivamholidaygrp@gmail.com",
+  "vat": "600850814"
+ },
+ "hotelCats": true,
+ "categories": [
+  "Ticket",
+  "Hotel",
+  "Food",
+  "Other",
+  "Vehicle Maintenance Expenses",
+  "Hotel - Ramada",
+  "Hotel - Aloft",
+  "Expenses"
+ ]
+}

@@ -1,0 +1,1 @@
+{"name":"travel-accounts","version":"1.1.0","description":"Voucher-based accounting and VAT bills for a Nepal travel & tours company","scripts":{"start":"node server.js"},"dependencies":{"exceljs":"^4.4.0"},"devDependencies":{"acorn":"^8.19.0","eslint-scope":"^9.1.2"}}

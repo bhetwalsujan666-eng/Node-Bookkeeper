@@ -1,0 +1,63 @@
+// server/posting/review.js — data for the review panel on the VAT registers page
+const { nkey, rd } = require('../accounts');
+const { eligible, isFuel, isFuelPayment, fuelJournal, isBookablePayment, invPay, vatInTotal, leftOutReason, vatBillProblem } = require('./purchasebook');
+const { purchaseBad } = require('./purchase');
+const { salesBad } = require('./sales');
+
+// Hand-made vouchers (journals / payments typed on the New voucher page) that may hold a purchase
+const isHand = (d, v) => !v.pmt && !v.sal && !v.rcpt && !v.purchase && ['Journal', 'Payment'].includes(v.type) && !d.bills.some(b => b.voucherId === v.id);
+
+// What the voucher debits to expense/asset accounts, and to 1050 VAT Receivable (input VAT)
+function debits(d, v) {
+  let exp = 0, vat = 0;
+  v.lines.forEach(l => { const a = d.accounts.find(x => x.code === l.account); if (l.account === '1050') vat += l.dr - l.cr; else if (eligible(a)) exp += l.dr - l.cr; });
+  return { exp: rd(exp), vat: rd(vat) };
+}
+
+// The invoice details linked to a voucher must be a VAT bill, and agree with what the voucher posted, so the register and the ledger tell the same story
+function taxInvProblem(d, v, t) {
+  const { exp, vat } = debits(d, v), total = rd((+t.nonTax || 0) + (+t.taxable || 0) + (+t.vat || 0));
+  const notVat = vatBillProblem(t); if (notVat) return notVat;
+  if (Math.abs(rd(exp + vat) - total) > 1) return `The voucher debits ${exp} to expense/asset accounts and ${vat} to VAT Receivable (${rd(exp + vat)}), but the invoice totals ${total}. One voucher can be linked to one invoice only.`;
+  if ((+t.vat || 0) > 0 && Math.abs(vat - (+t.vat)) > 1) return `The invoice has VAT of ${t.vat} but the voucher posts ${vat} to 1050 VAT Receivable. Edit the voucher so the VAT is debited to 1050 (and the expense reduced by the same amount), then add it to the purchase book.`;
+  if (!(+t.vat > 0) && vat > 1) return `The voucher posts ${vat} to 1050 VAT Receivable but the invoice shows no VAT.`;
+  return null;
+}
+
+const dupInvoice = (d, t, selfId) => d.bills.some(x => x.kind === 'purchase' && nkey(x.supplier) === nkey(t.supplier) && nkey(x.billNo) === nkey(t.billNo))
+  || d.vouchers.some(x => x.taxInv && x.id !== selfId && nkey(x.taxInv.supplier) === nkey(t.supplier) && nkey(x.taxInv.billNo) === nkey(t.billNo));
+
+function registerReview(d) {
+  const nm = c => (d.accounts.find(a => a.code === c) || {}).name || c;
+  const pays = d.vouchers.filter(v => v.pmt && v.pmt.other), included = [], excluded = [], fuel = [], others = [];
+  // Payments made without an invoice are left out, except FUEL that was reviewed and added (v.fuelBook): those are in the purchase book (see fuelVouchers in purchasebook.js)
+  pays.forEach(v => {
+    const a = d.accounts.find(x => x.code === v.pmt.debitAccount), isF = isFuelPayment(d, v), vat = vatInTotal(v.pmt.amount),
+      row = { id: v.id, no: v.no, date: v.date, bs: v.bs || '', payee: v.pmt.payee, account: nm(v.pmt.debitAccount), note: v.pmt.note || '', amount: v.pmt.amount, fuel: isF, vatInTotal: vat, taxable: rd(v.pmt.amount - vat), canBook: isBookablePayment(d, v), inBook: isBookablePayment(d, v) && !!v.fuelBook, reason: leftOutReason(a, v) };
+    const it = invPay(d, v); // tax invoice typed on the payment: shown with its own figures, added by invoice (not 13/113)
+    if (it) {
+      const dup = dupInvoice(d, it, v.id) || d.vouchers.some(y => y.id !== v.id && y.invBook && y.pmt && y.pmt.inv && nkey(y.pmt.payee) === nkey(it.supplier) && nkey(y.pmt.inv.billNo) === nkey(it.billNo));
+      row.inv = it; row.invProblem = vatBillProblem(it) || (dup ? `Invoice ${it.billNo} from ${it.supplier} is already in the purchase book` : null);
+      row.inBook = !!v.invBook && !vatBillProblem(it); row.reason = row.invProblem || 'Tax invoice entered on this payment: review it, then add it to the purchase book';
+    }
+    if (isF) fuel.push(row); else others.push(row); if (row.inBook) included.push(row); else excluded.push(row);
+  });
+  const byDate = (a, b) => a.date.localeCompare(b.date) || String(a.no).localeCompare(String(b.no), undefined, { numeric: true }); excluded.sort(byDate); others.sort(byDate); fuel.sort(byDate); included.sort(byDate);
+  const journals = d.vouchers.filter(v => isHand(d, v)).map(v => {
+    const { exp, vat } = debits(d, v); if (exp <= 0) return null;
+    const t = v.taxInv, problem = t ? taxInvProblem(d, v, t) : null, fj = fuelJournal(d, v), fuelIn = !!(fj && v.fuelBook); // fj: fuel with no VAT bill, may be added by hand (see fuelVouchers in purchasebook.js)
+    return { id: v.id, no: v.no, type: v.type, date: v.date, bs: v.bs || '', narration: v.narration || '', exp, vat, credits: v.lines.filter(l => l.cr > 0 && l.account !== '1050').map(l => nm(l.account)), taxInv: t || null,
+      fuel: fj ? { amount: fj.amount, taxable: fj.taxable, vat: fj.vat, vatBooked: fj.vatBooked, inBook: fuelIn } : null,
+      status: t ? (problem ? 'Mismatch' : 'In purchase book') : fuelIn ? 'In purchase book (fuel)' : vat > 0 ? 'VAT booked, not in purchase book' : 'Not in purchase book', problem };
+  }).filter(Boolean).sort((a, b) => b.date.localeCompare(a.date));
+  const issues = [];
+  d.bills.forEach(b => {
+    const bad = b.kind === 'purchase' ? purchaseBad(b) : salesBad({ customer: b.customer, date: b.date, bs: b.bs, total: b.total, nonTax: b.nonTax, customerVat: b.customerVat });
+    if (bad) issues.push({ id: b.id, kind: b.kind, billNo: b.billNo, party: b.kind === 'purchase' ? b.supplier : b.customer, date: b.date, issue: bad });
+    if (b.kind === 'purchase' && d.bills.some(x => x.kind === 'purchase' && x.id < b.id && nkey(x.supplier) === nkey(b.supplier) && nkey(x.billNo) === nkey(b.billNo))) issues.push({ id: b.id, kind: b.kind, billNo: b.billNo, party: b.supplier, date: b.date, issue: 'Entered more than once (same supplier and bill no.). Its VAT may be claimed twice' });
+    if (b.kind === 'sales' && d.bills.some(x => x.kind === 'sales' && x.id < b.id && nkey(x.billNo) === nkey(b.billNo))) issues.push({ id: b.id, kind: b.kind, billNo: b.billNo, party: b.customer, date: b.date, issue: 'Invoice number used more than once' });
+  });
+  return { included, excluded, fuel, others, journals, issues };
+}
+
+module.exports = { dupInvoice, registerReview, taxInvProblem };

@@ -1,0 +1,156 @@
+// pages/registers.js — VAT register page (each section is a full-width bar that expands)
+import { $, applySide, esc, post, setSideForce, syncAllTW, toast } from '../lib/dom.js';
+import { f, rd } from '../lib/format.js';
+import { D, FR, TO, load } from '../lib/state.js';
+
+const ONE_AT_A_TIME = true; // false = several sections can stay open together
+
+// Open / close a section. While any section is open the sidebar collapses; when all are closed it returns.
+export function regToggle(id) {
+  const o = window.regOpen = window.regOpen || {}, was = !!o[id];
+  if (ONE_AT_A_TIME) for (const k in o) delete o[k];
+  if (was) delete o[id]; else o[id] = true;
+  document.querySelectorAll('.rsec').forEach(s => { const on = !!o[s.id.slice(3)]; s.classList.toggle('open', on); s.querySelector('.rhd').setAttribute('aria-expanded', on); });
+  setSideForce(Object.keys(o).length ? true : null); applySide(); syncAllTW(); regFilter();
+}
+
+const sec = (id, title, meta, body) => {
+  const on = !!(window.regOpen && window.regOpen[id]), mx = window.regMaxed === id;
+  return `<section class="rsec${on ? ' open' : ''}" id="rs-${id}"${mx ? ` data-max="1" style="${MAXCSS}"` : ''}><button type="button" class="rhd" aria-expanded="${on}" onclick="regToggle('${id}')"><b>${title}</b><span>${meta}</span><i aria-hidden="true"></i></button><div class="rbody card">${mx ? body.replaceAll('class="tw rscroll"', 'class="tw rscroll" style="max-height:none"') : body}</div></section>`;
+};
+
+// Maximise: a section fills the whole screen (state survives re-renders such as after "Add to purchase book")
+const MAXCSS = 'position:fixed;inset:0;z-index:60;overflow:auto;padding:62px 16px 12px;background:Canvas';
+export function regMax(id) {
+  const s = document.getElementById('rs-' + id); if (!s) return;
+  const on = window.regMaxed !== id; window.regMaxed = on ? id : null;
+  s.style.cssText = on ? MAXCSS : ''; if (on) s.dataset.max = '1'; else delete s.dataset.max;
+  const rb = document.getElementById('regbar'); if (rb) rb.style.cssText = on ? BARMAX : BARNORM;
+  s.querySelectorAll('.rscroll').forEach(t => t.style.maxHeight = on ? 'none' : '');
+  s.querySelectorAll('.mxb').forEach(b => b.textContent = on ? 'Restore size' : 'Maximise');
+  syncAllTW();
+}
+const xlBtn = (path, label) => `<button type="button" class="p sp" onclick="getFile('${path}?from=${FR()}&to=${TO()}')">${label}</button>`;
+const rvBtn = () => xlBtn('/api/xlsx/review', 'Download Excel (review vouchers)'), loBtn = () => xlBtn('/api/xlsx/leftout', 'Download Excel (left-out payments)');
+const mxBtn = id => `<button type="button" class="mxb" onclick="regMax('${id}')">${window.regMaxed === id ? 'Restore size' : 'Maximise'}</button>`;
+
+// ---- Search: one box for the whole page; it filters the rows of every section, so it works on whichever section is open ----
+const BARNORM = 'position:sticky;top:0;z-index:5;background:Canvas;padding:6px 0;display:flex;gap:8px;align-items:center;flex-wrap:wrap';
+const BARMAX = 'position:fixed;top:10px;left:16px;right:16px;z-index:70;background:Canvas;padding:6px 0;display:flex;gap:8px;align-items:center;flex-wrap:wrap';
+const bar = () => `<div id="regbar" style="${window.regMaxed ? BARMAX : BARNORM}"><input id="regq" type="search" placeholder="Search the open section: bill no., supplier, PAN, narration, amount…" value="${esc(window.regQ || '')}" oninput="regSearch(this.value)" onkeydown="if(event.key==='Escape')regClear()" style="flex:1;min-width:220px;max-width:560px"><button type="button" onclick="regClear()">Clear</button><span id="regqs" class="sub" style="margin:0"></span></div>`;
+
+export function regSearch(v) { window.regQ = v || ''; regFilter(); }
+export function regClear() { window.regQ = ''; const i = document.getElementById('regq'); if (i) i.value = ''; regFilter(); }
+
+export function regFilter() {
+  const terms = (window.regQ || '').trim().toLowerCase().split(/\s+/).filter(Boolean), open = window.regOpen || {}, counts = {};
+  document.querySelectorAll('.rsec').forEach(sc => {
+    const id = sc.id.slice(3); let tot = 0, vis = 0;
+    sc.querySelectorAll('table').forEach(tb => {
+      const trs = [...tb.querySelectorAll('tr')];
+      trs.forEach((tr, i) => {
+        if (tr.querySelector('th') || tr.classList.contains('t') || tr.dataset.empty || tr.dataset.with) return;
+        const nx = trs[i + 1], pair = nx && nx.dataset.with, txt = (tr.textContent + (pair ? ' ' + nx.textContent : '')).toLowerCase(), flat = txt.replace(/,/g, '');
+        const ok = terms.every(t => txt.includes(t) || flat.includes(t.replace(/,/g, '')));
+        tr.style.display = ok ? '' : 'none'; if (pair) nx.style.display = ok ? '' : 'none';
+        tot++; if (ok) vis++;
+      });
+    });
+    counts[id] = { tot, vis, title: (sc.querySelector('.rhd b') || {}).textContent || id };
+  });
+  const st = document.getElementById('regqs'); if (!st) return;
+  if (!terms.length) { st.textContent = ''; return; }
+  const op = Object.keys(open).filter(k => open[k] && counts[k]);
+  st.textContent = op.length ? op.map(k => `${counts[k].vis} of ${counts[k].tot} rows match`).join(' · ')
+    : 'Open a section to see matches: ' + Object.values(counts).map(c => `${c.title.replace(/\s*\(.*$/, '')} ${c.vis}`).join(' · ');
+}
+
+export const reg = () => {
+  // Purchase rows = saved bills + purchases recorded only as payments / linked vouchers
+  const rows = k => [...D.bills, ...(D.payPurchases || []), ...(D.refundRows || [])].filter(b => b.kind == k && b.date >= FR() && b.date <= TO()).sort((a, b) => a.date.localeCompare(b.date) || String(a.billNo).localeCompare(String(b.billNo), undefined, { numeric: true }));
+  const sum = (R, k) => rd(R.reduce((s, b) => s + b[k], 0)), PR = rows('purchase'), SR = rows('sales');
+  const mk = (kind, title, R) => {
+    const P = kind == 'purchase', noBs = R.filter(b => !b.bs).length;
+    const body = `<div class="ch">${mxBtn(kind)}${noBs ? `<span class="err">${noBs} bill(s) have no BS date, so the AD date is shown in the register.</span>` : ''}<button class="p sp" onclick="getFile('/api/xlsx/register/${kind}?from=${FR()}&to=${TO()}')">Download Excel</button></div>
+      <div class="tw rscroll"><table><tr><th>Miti</th><th>Bill no.</th><th>${P ? 'Supplier' : 'Buyer'}</th><th>PAN</th><th>Particulars</th><th class="n">Total</th><th class="n">Exempt</th><th class="n">Taxable</th><th class="n">VAT</th></tr>` +
+      R.map(b => `<tr><td>${esc(b.bs || b.date)}</td><td>${esc(b.billNo || (b.fromPayment ? b.voucher + ' (payment)' : ''))}</td><td>${esc(P ? b.supplier : b.customer)}</td><td>${esc(P ? b.supplierPan : b.customerVat)}</td><td>${esc(b.particulars)}</td><td class="n">${f(b.total)}</td><td class="n">${f(b.nonTax)}</td><td class="n">${f(b.taxable)}</td><td class="n">${f(b.vat)}</td></tr>`).join('') +
+      `<tr class="t"><td colspan="5">Total</td><td class="n">${f(sum(R, 'total'))}</td><td class="n">${f(sum(R, 'nonTax'))}</td><td class="n">${f(sum(R, 'taxable'))}</td><td class="n">${f(sum(R, 'vat'))}</td></tr></table></div>`;
+    return sec(kind, title, `${R.length} bill${R.length == 1 ? '' : 's'} · VAT ${f(sum(R, 'vat'))}`, body);
+  };
+  const o = sum(SR, 'vat'), i = sum(PR, 'vat');
+  const html = bar() + `<div class="vat"><div><span>Output VAT (sales)</span><b>${f(o)}</b></div><div><span>Input VAT (purchases)</span><b>${f(i)}</b></div><div class="net"><span>VAT for this period: ${o >= i ? 'payable' : 'credit carried forward'}</span><b>${f(o - i)}</b></div></div>` +
+    mk('purchase', 'Purchase book (खरिद खाता)', PR) + mk('sales', 'Sales book (बिक्री खाता)', SR) + review();
+  setTimeout(regFilter, 0); return html;
+};
+
+// ---- Review: what is (and is not) in the purchase book besides bills, and old records that need attention ----
+const inPeriod = d => d >= FR() && d <= TO();
+
+export const review = () => {
+  const R = D.review || { included: [], excluded: [], journals: [], issues: [] }, J = R.journals.filter(j => inPeriod(j.date)), exc = R.excluded.filter(x => inPeriod(x.date)), fuel = (R.fuel || []).filter(x => inPeriod(x.date)), oth = (R.others || []).filter(x => inPeriod(x.date));
+  const th = (...h) => '<tr>' + h.map(x => `<th${/^#/.test(x) ? ' class="n"' : ''}>${x.replace(/^#/, '')}</th>`).join('') + '</tr>', empty = (n, t) => `<tr data-empty="1"><td colspan="${n}"><i>${t}</i></td></tr>`;
+  const inp = (id, ph, v = '', w = 90) => `<input id="${id}" placeholder="${ph}" value="${esc(v)}" style="width:${w}px">`, num = (id, ph, v) => `<input id="${id}" type="number" step="any" placeholder="${ph}" value="${v || ''}" style="width:80px">`;
+  const FLEX = 'display:flex;flex-wrap:wrap;gap:8px;align-items:center';
+  const jr = j => {
+    const t = j.taxInv, F = !t && j.fuel ? j.fuel : null, tx = j.vat > 0 ? rd(j.vat / .13) : 0, form = t
+      ? `<div style="${FLEX}">${esc(t.supplier)} · PAN ${esc(t.supplierPan)} · bill ${esc(t.billNo)} · taxable ${f(t.taxable)} · VAT ${f(t.vat)} <button onclick="unlinkTaxInv(${j.id})">Remove from purchase book</button></div>`
+      : F && F.inBook ? `<div style="${FLEX}">Fuel (no VAT no. / invoice no.) · taxable ${f(F.taxable)} · VAT ${f(F.vat)} <button onclick="fuelRemove(${j.id})">Remove from purchase book</button></div>`
+      : `<div style="${FLEX}">${inp('ti' + j.id + 's', 'Supplier', '', 190)}${inp('ti' + j.id + 'p', F ? 'PAN (optional for fuel)' : 'PAN (9 digits)', '', 130)}${inp('ti' + j.id + 'b', F ? 'Invoice no. (optional)' : 'Invoice no.', '', 120)}${num('ti' + j.id + 'n', 'Non-taxable', F ? 0 : rd(j.exp - tx))}${num('ti' + j.id + 't', 'Taxable', F ? F.taxable : tx)}${num('ti' + j.id + 'v', 'VAT', F ? F.vat : j.vat)}<button class="p" onclick="linkTaxInv(${j.id}${F ? ', true' : ''})">Add to purchase book</button>${F ? `<small>Fuel: no VAT no. or invoice no. needed. VAT is ${F.vatBooked ? 'as booked to 1050' : '13/113 of the amount'}.</small>` : ''}</div>`;
+    return `<tr><td style="white-space:nowrap">${esc(j.no)}<br>${esc(j.bs || j.date)}</td><td>${esc(j.narration)}<br><small>Credited to: ${esc(j.credits.join(', '))}</small></td><td class="n" style="white-space:nowrap">${f(j.exp)}<br><small>VAT ${f(j.vat)}</small></td><td><span class="chip ${j.status.startsWith('In purchase book') ? 'ok' : 'due'}">${esc(j.status)}</span>${j.problem ? `<br><span class="err">${esc(j.problem)}</span>` : ''}</td></tr>
+      <tr data-with="1"><td colspan="4" style="padding-top:0;border-bottom:2px solid rgba(128,128,128,.35)">${form}</td></tr>`;
+  };
+
+  // 1. Hand-made vouchers that may hold a purchase
+  const pending = J.filter(j => !j.status.startsWith('In purchase book')).length;
+  const vouchers = sec('rev-vouchers', 'Review: purchases that are not purchase bills', `${J.length} voucher${J.length == 1 ? '' : 's'} · ${pending} not in purchase book`,
+    `<div class="ch">${mxBtn('rev-vouchers')}${rvBtn()}</div><p class="note">Vouchers typed by hand (for example expenses the CEO paid for the company) are <b>not</b> in the purchase book until you add the supplier's tax invoice details below. Input VAT can only be claimed with a tax invoice in the company's name and PAN. The voucher must already debit the VAT to <b>1050 VAT Receivable</b>. <b>Fuel</b> (a voucher debiting a fuel expense account) is the exception: it can be added with the <b>Add fuel to purchase book</b> button without a VAT no. or invoice no. (VAT = 13/113 of the amount, unless the voucher already debits VAT to 1050; the voucher no. is shown in place of the bill no.).</p>
+    <div class="tw" style="max-height:none"><table>${th('Voucher', 'Narration', '#Expense / VAT', 'Status and tax invoice')}${J.length ? J.map(jr).join('') : empty(4, 'No hand-made vouchers with expenses in this period')}</table></div>`);
+
+  // 2. Fuel paid with no VAT bill / bill no.: review, then add to the purchase book (VAT = 13/113 of the amount paid)
+  const fuelNew = fuel.filter(x => !x.inBook), fuelTot = rd(fuel.reduce((t, x) => t + (+x.amount || 0), 0));
+  const fuelSec = sec('rev-fuel', 'Review: fuel purchases (add to purchase book)', `${fuel.length} payment${fuel.length == 1 ? '' : 's'} · ${fuel.length - fuelNew.length} in purchase book · ${f(fuelTot)}`,
+    `<div class="ch">${mxBtn('rev-fuel')}${fuelNew.length ? `<button class="p sp" onclick="fuelAddAll([${fuelNew.map(x => x.id).join(',')}])">Add all ${fuelNew.length} to purchase book</button>` : ''}${loBtn()}</div><p class="note">Fuel paid from Payments made can go in the purchase book even without a VAT no. or bill no. Review each payment, then press <b>Add</b>. The VAT is worked out by us as 13/113 of the amount paid, and the voucher number is shown in place of the bill number. This changes the register only: the ledger still holds the full amount in the expense account, so the VAT is not in 1050 VAT Receivable.</p>
+    <div class="tw" style="max-height:none"><table>${th('Voucher', 'Date', 'Paid to', 'Charged to', 'Note', '#Amount', '#Taxable', '#VAT (13/113)', 'Purchase book')}${fuel.length ? fuel.map(x => `<tr><td>${esc(x.no)}</td><td>${esc(x.bs || x.date)}</td><td>${esc(x.payee)}</td><td>${esc(x.account)}</td><td><small>${esc(x.note)}</small></td><td class="n">${f(x.amount)}</td><td class="n">${f(x.taxable)}</td><td class="n">${f(x.vatInTotal)}</td><td style="white-space:nowrap">${x.inBook ? `<span class="chip ok">In purchase book</span> <button onclick="fuelRemove(${x.id})">Remove</button>` : `<button class="p" onclick="fuelAdd(${x.id})">Add</button>`}</td></tr>`).join('') : empty(9, 'No fuel payments in this period')}</table></div>`);
+
+  // 3. New payments (made to someone who is not a recorded supplier), fuel excluded (it has its own section above): review, then add to / remove from the purchase book
+  const nInvNew = oth.filter(x => x.inv && !x.inBook && !x.invProblem), nIn = oth.filter(x => x.inBook).length, nTot = rd(oth.reduce((t, x) => t + (+x.amount || 0), 0));
+  const payments = sec('rev-payments', 'Review: new payments (not to a recorded supplier)', `${oth.length} payment${oth.length == 1 ? '' : 's'} · ${nIn} in purchase book · ${f(nTot)}`,
+    `<div class="ch">${mxBtn('rev-payments')}${nInvNew.length ? `<button class="p sp" onclick="invAddAll([${nInvNew.map(x => x.id).join(',')}])">Add all ${nInvNew.length} with tax invoice</button>` : ''}${loBtn()}</div><p class="note">Payments made through <b>New payment</b> (money paid to someone who is not a recorded supplier); fuel is reviewed in the section above. <b>With a tax invoice</b>: the invoice no., PAN, taxable amount and VAT typed on the payment are shown, and the VAT is already in 1050 VAT Receivable. Press <b>Add to purchase book</b> to enter it as a VAT bill (it needs a 9-digit PAN, an invoice no. and VAT above zero, and the invoice must not be in the book already). <b>Without an invoice</b>: not in the purchase book unless you review it and add it by hand (for example permits and entry fees); the VAT is then worked out as 13/113 of the amount paid and the voucher number replaces the bill number. That changes the register only. Salary, loans, bank charges, depreciation and advances cannot be added. To correct invoice details, edit the payment on Payments made.</p>
+    <div class="tw" style="max-height:none"><table>${th('Voucher', 'Date', 'Paid to', 'Charged to', 'Note', 'Tax invoice', '#Amount', '#Taxable', '#VAT', 'Purchase book')}${oth.length ? oth.map(x => {
+      const i = x.inv, tx = i ? i.taxable : x.canBook ? x.taxable : null, vt = i ? i.vat : x.canBook ? x.vatInTotal : null,
+        act = x.inBook ? `<span class="chip ok">In purchase book</span> <button onclick="${i ? 'invRemove' : 'fuelRemove'}(${x.id})">Remove</button>`
+          : i ? (x.invProblem ? `<span class="err">${esc(x.invProblem)}</span><br><small>Edit the payment on Payments made</small>` : `<button class="p" onclick="invAdd(${x.id})">Add to purchase book</button>`)
+          : x.canBook ? `<button class="p" onclick="fuelAdd(${x.id})">Add to purchase book</button><br><small>${esc(x.reason)}</small>` : `<small>${esc(x.reason)}</small>`;
+      return `<tr><td>${esc(x.no)}</td><td>${esc(x.bs || x.date)}</td><td>${esc(x.payee)}</td><td>${esc(x.account)}</td><td><small>${esc(x.note)}</small></td><td>${i ? `${esc(i.billNo)}<br><small>PAN ${esc(i.supplierPan)}</small>` : '<small>No invoice</small>'}</td><td class="n">${f(x.amount)}</td><td class="n">${tx == null ? '' : f(tx)}</td><td class="n">${vt == null ? '' : f(vt)}</td><td style="white-space:nowrap">${act}</td></tr>`;
+    }).join('') : empty(10, 'No new payments in this period')}</table></div>`);
+
+  // 4. Saved bills with problems (all dates)
+  const issues = sec('rev-issues', 'Saved bills that need attention', `${R.issues.length} issue${R.issues.length == 1 ? '' : 's'} · all dates`,
+    `<div class="ch"><span class="sub" style="margin:0">All dates. Fix with Records → edit</span>${mxBtn('rev-issues')}</div>
+    <div class="tw" style="max-height:none"><table>${th('Type', 'Bill no.', 'Party', 'Date', 'Problem')}${R.issues.length ? R.issues.map(x => `<tr><td>${x.kind}</td><td>${esc(x.billNo)}</td><td>${esc(x.party)}</td><td>${esc(x.date)}</td><td class="err">${esc(x.issue)}</td></tr>`).join('') : empty(5, 'No problems found')}</table></div>`);
+
+  return vouchers + fuelSec + payments + issues;
+};
+
+export async function linkTaxInv(id, fuel) {
+  const g = k => $('#ti' + id + k).value, body = { supplier: g('s'), supplierPan: g('p'), billNo: g('b'), nonTax: g('n'), taxable: g('t'), vat: g('v') };
+  const full = body.supplier.trim() && /^\d{9}$/.test(body.supplierPan.trim()) && body.billNo.trim() && +body.vat > 0;
+  if (fuel && !full) return fuelAdd(id, { supplier: body.supplier.trim(), billNo: body.billNo.trim() }); // fuel: no VAT no. / invoice no. needed
+  if (!full) return alert('Only VAT bills go in the purchase book. It needs the supplier name, a 9-digit VAT/PAN number, the bill number and VAT above zero. A PAN-only bill, or one without a bill number, is not added.');
+  const j = await post('/api/vouchers/' + id + '/taxinv', body); if (!j) return; await load(); toast('Added to the purchase book');
+}
+
+export async function unlinkTaxInv(id) { if (!confirm('Remove this voucher from the purchase book? The voucher itself is not changed.')) return; await fetch('/api/vouchers/' + id + '/taxinv', { method: 'DELETE' }); await load(); }
+
+export async function fuelAdd(id, det) { const r = await fetch('/api/vouchers/' + id + '/fuelbook', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(det || {}) }), j = await r.json().catch(() => ({})); if (!r.ok) return alert(j.error || 'Could not add this payment'); await load(); toast('Added to the purchase book'); }
+
+export async function fuelRemove(id) { if (!confirm('Remove this fuel payment from the purchase book? The payment itself is not changed.')) return; await fetch('/api/vouchers/' + id + '/fuelbook', { method: 'DELETE' }); await load(); }
+
+export async function fuelAddAll(ids) { if (!confirm(ids.length + ' fuel payment(s) will be added to the purchase book, with VAT worked out as 13/113 of each amount. Continue?')) return; const j = await post('/api/fuelbook', { ids }); if (!j) return; await load(); toast(j.added + ' fuel payment(s) added to the purchase book'); }
+
+// ---- New payments with a tax invoice: add / remove in the purchase book ----
+export async function invAdd(id) { const r = await fetch('/api/vouchers/' + id + '/invbook', { method: 'POST' }), j = await r.json().catch(() => ({})); if (!r.ok) return alert(j.error || 'Could not add this payment'); await load(); toast('Added to the purchase book'); }
+
+export async function invRemove(id) { if (!confirm('Remove this payment from the purchase book? The payment itself is not changed.')) return; await fetch('/api/vouchers/' + id + '/invbook', { method: 'DELETE' }); await load(); }
+
+export async function invAddAll(ids) { if (!confirm(ids.length + ' payment(s) with a tax invoice will be added to the purchase book. Continue?')) return; const j = await post('/api/invbook', { ids }); if (!j) return; await load(); toast(j.added + ' payment(s) added to the purchase book' + (j.skipped ? ', ' + j.skipped + ' skipped (see the problem shown on the row)' : '')); }

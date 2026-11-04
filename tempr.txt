@@ -1,0 +1,10 @@
+Folder PATH listing for volume New Volume
+Volume serial number is 000000FB C497:7C33
+D:\SUJAN NEW FOLDER\NODE\TEMPLATES
+    data.json
+    db.json
+    purchase-register.xlsx
+    sales-register.xlsx
+    
+No subfolders exist 
+

@@ -1,0 +1,98 @@
+// pages/payments.js — Payments made page
+// (split out of the old single-file index.html by migrate.js; code is unchanged)
+import { esc } from '../lib/dom.js';
+import { f, ymd } from '../lib/format.js';
+import { D, MODES, cashAccs } from '../lib/state.js';
+import { paidFrom, payFromName, splitBox, staffOwed } from './payments-forms.js';
+
+export const pay = () => {
+    const R = D.payables,
+    key = x => String(x || '').trim().toLowerCase(),
+    sel = R.find(c => key(c.name) == key(window.pys)),
+    er = window.pye,
+    today = ymd(),
+    pre = er ? {
+        date: er.date,
+        bs: er.bs,
+        amount: er.pmt.amount,
+        mode: er.pmt.mode,
+        account: er.pmt.splits ? er.pmt.splits[0].account : er.pmt.account,
+        instrument: er.pmt.splits ? er.pmt.splits[0].instrument : er.pmt.instrument,
+        more: er.pmt.splits ? er.pmt.splits.slice(1) : [],
+        billId: er.pmt.billId,
+        note: er.pmt.note,
+        payee: er.pmt.payee,
+        debit: er.pmt.debitAccount,
+        fee: er.pmt.fee,
+        byStaff: er.pmt.byStaff,
+        paidBy: er.pmt.paidBy,
+        inv: er.pmt.inv
+    } : (window.pyp || {}),
+inp = (id, l, v = '', x = '', c = '') => `<label class="${c}">${l}<input id="${id}" value="${esc(v)}" ${x}></label>`, ca = cashAccs(), dflt = pre.account || (ca.find(a => /cash/i.test(a.name)) || ca[0] || {}).code,
+q = (...a) => esc(a.join(' ').toLowerCase()), pos = x => Math.max(x, 0), bal = n => f(Math.abs(n)) + (n >= 0 ? ' Cr' : ' Dr'),
+tot = R.reduce((t, c) => t + pos(c.balance), 0), adv = R.reduce((t, c) => t + pos(-c.balance), 0), dues = R.filter(c => c.balance > .004).length,
+state = c => c.balance > .004 ? '<span class="chip due">Payable</span>' : c.balance <  - .004 ? '<span class="chip">Advance paid</span>' : c.billed ? '<span class="chip ok">Settled</span>' : '',
+stChip = b => b.status == 'Paid' ? '<span class="chip ok">Paid</span>' : b.status == 'Partial' ? '<span class="chip due">Part paid</span>' : '<span class="chip due">Unpaid</span>',
+modeSel = `<label>Mode<select id="ymo" onchange="ymode()">${MODES.map(m => `<option ${m == pre.mode ? 'selected' : ''}>${m}</option>`).join('')}</select></label><label id="yfw" ${pre.mode == 'Fonepay' ? '' : 'hidden'}>Fonepay charge<input id="yfe" type="number" step="any" value="${pre.fee ?? ''}" placeholder="0.00"></label>`,
+paidBySel = `<label class="w2">Paid by staff / CEO (blank if the company paid)<input id="ypb" list="ypbl" value="${esc(pre.paidBy || '')}" oninput="ypbChg()" placeholder="Select or type a name"></label><datalist id="ypbl">${(D.db.staff || []).map(s => `<option value="${esc(s.name)}">`).join('')}</datalist>`,
+fromSel = `<label id="yfr" ${pre.paidBy || pre.byStaff ? 'hidden' : ''}>Paid from<select id="yac">${ca.map(a => `<option value="${a.code}" ${a.code == dflt ? 'selected' : ''}>${esc(a.name)}</option>`).join('')}</select></label>`,
+staffSel = `<label>Paid by staff (own money)<select id="ysf" onchange="$('#yac').closest('label').hidden=!!this.value"><option value="">No, paid from cash/bank</option>${D.db.staff.filter(s => s.ledger).map(s => `<option value="${esc(s.name)}" ${s.name == pre.byStaff ? 'selected' : ''}>${esc(s.name)}</option>`).join('')}</select></label>`;
+const rows = R.map((c, i) => ({
+            c,
+            i
+        })).filter(({
+            c
+        }) => !window.onlyDueP || c.balance > .004).map(({
+            c,
+            i
+        }) => `<tr class="click ${sel && key(sel.name) == key(c.name) ? 'sel' : ''}" data-q="${q(c.name, c.pan)}" onclick="pickSup(${i})"><td><b>${esc(c.name)}</b><br>${state(c)}</td><td class="n">${c.balance > .004 ? f(c.balance) : c.balance <  - .004 ? f(-c.balance) + ' adv.' : '—'}</td></tr>`).join('');
+const credAccs = D.accounts.filter(a => !ca.some(c => c.code == a.code) && a.group != 'Sundry Creditors'), groups = [...new Set(credAccs.map(a => a.group))],
+newForm = () => `<div class="card" id="sdet"><div class="ch"><h2>${er ? 'Edit payment ' + esc(er.no) : 'New payment made'}</h2></div>
+        <p class="sub"><small>Use this for money paid to someone who is not a recorded supplier, or paid through another party. Choose what it should be charged to: a supplier's account (type the name; a new supplier is added automatically), or any other account such as an advance, an expense or a loan.</small></p>
+        <div class="row">${inp('ypy', 'Paid to (payee)', pre.payee, 'placeholder="e.g. Himalayan Hotel Pvt. Ltd."', 'w2')}
+          <label class="w2">Charge to<select id="ycr" onchange="ycrChg()"><option value="">A supplier's account</option>${groups.map(g => `<optgroup label="${esc(g)}">${credAccs.filter(a => a.group == g).map(a => `<option value="${a.code}" ${a.code == pre.debit ? 'selected' : ''}>${esc(a.name)}</option>`).join('')}</optgroup>`).join('')}</select></label>
+          <label class="w4" id="ycnw" ${pre.debit ? 'hidden' : ''}>Supplier name<input id="ycn" list="pls" value="${esc(er && !pre.debit ? er.pmt.supplier : '')}" placeholder="Whose bills is this payment for?"></label>
+          <label>Date (AD)<input type="date" id="ydt" value="${pre.date || today}"></label>${inp('ybs', 'Date (BS)', pre.bs)}${inp('yam', 'Amount paid', pre.amount, 'type="number" step="any" oninput="spSum()"')}
+          ${modeSel}${paidBySel}${fromSel}${staffSel}${inp('yin', 'Cheque no. / Transaction ID', pre.instrument, `oninput="chqPick('yin','yac','ymo')"`)}${inp('ynt', 'Note (optional)', pre.note, '', 'w2')}
+          ${inp('yiv', 'Tax invoice no. (to claim VAT)', pre.inv && pre.inv.billNo)}${inp('yip', 'Supplier PAN (9 digits)', pre.inv && pre.inv.supplierPan)}${inp('yit', 'Taxable amount on invoice (excl. VAT)', pre.inv && pre.inv.taxable, 'type="number" step="any"')}</div>
+        <p class="sub" style="margin:6px 0 0"><small>Fill the three tax invoice boxes only if you hold a tax invoice in the company's name and PAN and this is charged to an expense or asset account. 13% VAT is then claimed automatically. Review the payment under VAT registers → Review and add it to the purchase book. If a staff member paid, the company owes them: use <b>Reimburse</b> in the Due to staff list when you repay.</small></p>
+        ${splitBox(pre)}
+        <div class="actbar"><button class="p" onclick="savePayment(true)">${er ? 'Update payment' : 'Save payment'}</button><button onclick="window.pye=null;window.pyn=false;render()">Cancel</button></div></div>`,
+others = D.vouchers.filter(v => v.pmt && v.pmt.other).sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id),
+otherCard = !others.length ? '' : `<div class="card"><div class="ch"><h2>Other payments made</h2><span class="sub" style="margin:0">Not to a recorded supplier</span></div><div class="tw"><table><thead><tr><th>Date</th><th>Voucher</th><th>Paid to</th><th>Charged to</th><th>Mode</th><th>Paid from</th><th class="n">Amount</th><th></th></tr></thead><tbody>${others.map(v => {
+        const ac = D.accounts.find(a => a.code == v.pmt.debitAccount);
+        return `<tr><td>${v.date}${v.bs ? '<br><small>' + esc(v.bs) + '</small>' : ''}</td><td><b>${v.no}</b>${v.ref ? '<br><small>' + esc(v.ref) + '</small>' : ''}</td><td>${esc(v.pmt.payee)}${v.pmt.note ? '<br><small>' + esc(v.pmt.note) + '</small>' : ''}</td><td>${esc(ac ? ac.name : v.pmt.debitAccount)}</td><td>${esc(v.pmt.mode)}</td><td>${esc(payFromName(v.pmt) || v.pmt.account)}</td><td class="n">${f(v.pmt.amount)}</td><td class="act"><a href="#" onclick="getFile('/api/xlsx/voucher/${v.id}');return false">Excel</a> <button onclick="editV(${v.id})">Edit</button> <button class="d" onclick="del(${v.id})">Delete</button></td></tr>`;
+    }).join('')}</tbody></table></div></div>`;
+const staffAccs = D.accounts.filter(a => a.group == 'Staff Payables'),
+staffCard = !staffAccs.length ? '' : `<div class="card"><div class="ch"><h2>Due to staff</h2><span class="sub" style="margin:0">Paid by staff on the company's behalf</span></div><div class="tw"><table><thead><tr><th>Staff</th><th class="n">Company owes</th><th></th></tr></thead><tbody>${staffAccs.map(a => {
+        const o = staffOwed(a.code);
+        return `<tr><td>${esc(a.name.replace(/^Due to /, ''))}</td><td class="n">${f(o)}</td><td class="act">${o > .004 ? `<button onclick="reimburse('${a.code}')">Reimburse</button>` : ''}</td></tr>`;
+    }).join('')}</tbody></table></div></div>`;
+const detail = window.pyn ? newForm() : !sel ? '<div class="card"><p class="sub" style="margin:0">Pick a supplier on the left to see their statement and record a payment, or use <b>New payment</b> for money paid to someone who is not a recorded supplier.</p></div>' : `
+      <div class="card" id="sdet"><div class="ch"><h2>${esc(sel.name)}</h2>${sel.pan ? `<span class="chip">PAN/VAT ${esc(sel.pan)}</span>` : ''}${state(sel)}</div>
+        <div class="vat" style="margin:0"><div><span>Billed by supplier</span><b>${f(sel.billed)}</b></div><div><span>Paid</span><b>${f(sel.paid)}</b></div><div class="net"><span>${sel.balance <  - .004 ? 'Advance / overpaid' : 'Still payable'}</span><b>${f(Math.abs(sel.balance))}</b></div></div></div>
+      <div class="card"><div class="ch"><h2>${er ? 'Edit payment ' + esc(er.no) : 'Record payment made'}</h2></div>
+        <div class="row"><label>Date (AD)<input type="date" id="ydt" value="${pre.date || today}"></label>${inp('ybs', 'Date (BS)', pre.bs)}${inp('yam', 'Amount paid', pre.amount, 'type="number" step="any" oninput="spSum()"')}
+          ${modeSel}${paidBySel}${fromSel}${staffSel}${inp('yin', 'Cheque no. / Transaction ID', pre.instrument, `oninput="chqPick('yin','yac','ymo')"`)}
+          <label>Against bill<select id="ybl"><option value="">Auto (oldest bill first)</option>${sel.bills.filter(b => b.due > .004 || b.id == pre.billId).map(b => `<option value="${b.id}" ${b.id == pre.billId ? 'selected' : ''}>${esc(b.billNo)} · ${b.date} · due ${f(b.due)}</option>`).join('')}</select></label>${inp('ynt', 'Note (optional)', pre.note, '', 'w2')}</div>
+        ${splitBox(pre)}
+        <p class="sub" style="margin:8px 0 0"><small>The amount can be less than what is owed. A part payment leaves the bill as "Part paid" with the balance still due, and a payment larger than one bill carries over to the next oldest bill.</small></p>
+        <div class="actbar"><button class="p" onclick="savePayment(false)">${er ? 'Update payment' : 'Save payment'}</button>${er ? '<button onclick="window.pye=null;render()">Cancel</button>' : ''}</div></div>
+      <div class="card"><div class="ch"><h2>Bills</h2></div><div class="tw"><table><thead><tr><th>Date</th><th>Bill no.</th><th class="n">Total</th><th class="n">Paid</th><th class="n">Due</th><th>Status</th><th></th></tr></thead><tbody>${sel.bills.map(b => `<tr><td>${b.date}</td><td><b>${esc(b.billNo)}</b></td><td class="n">${f(b.total)}</td><td class="n">${f(b.paid)}</td><td class="n">${f(b.due)}</td><td>${stChip(b)}</td><td class="act">${b.due > .004 ? `<button onclick="paySupBill(${b.id}, ${b.due})">Pay</button>` : ''}</td></tr>`).join('') || '<tr><td class="empty" colspan="7">No purchase bills for this supplier yet.</td></tr>'}</tbody></table></div></div>
+      <div class="card"><div class="ch"><h2>Statement</h2></div><div class="tw"><table><thead><tr><th>Date</th><th>Voucher</th><th>Particulars</th><th class="n">Billed (Cr)</th><th class="n">Paid (Dr)</th><th class="n">Balance</th><th></th></tr></thead><tbody>${sel.statement.map(x => `<tr><td>${x.date}${x.bs ? '<br><small>' + esc(x.bs) + '</small>' : ''}</td><td><b>${x.no}</b>${x.ref ? '<br><small>' + esc(x.ref) + '</small>' : ''}</td><td>${esc(x.narration)}${x.pmt ? paidFrom(x.vid) : ''}</td><td class="n">${x.cr ? f(x.cr) : ''}</td><td class="n">${x.dr ? f(x.dr) : ''}</td><td class="n">${bal(x.bal)}</td>
+        <td class="act">${x.pmt ? `<a href="#" onclick="getFile('/api/xlsx/voucher/${x.vid}');return false">Excel</a> <button onclick="editV(${x.vid})">Edit</button> <button class="d" onclick="del(${x.vid})">Delete</button>` : x.billId ? `<a href="#" onclick="getFile('/api/xlsx/bill/${x.billId}');return false">Bill Excel</a> <button onclick="editBill(${x.billId})">Edit bill</button>` : `<button onclick="editV(${x.vid})">Edit</button>`}</td></tr>`).join('') || '<tr><td class="empty" colspan="7">Nothing yet.</td></tr>'}</tbody></table></div></div>`;
+return `<div class="card" style="padding:14px 18px;margin-bottom:16px">
+      <div class="fl" style="flex-wrap:wrap;align-items:center">
+        <label style="flex-direction:row;align-items:center;gap:8px;margin:0;white-space:nowrap;font-weight:500">Supplier
+          <input type="search" id="spick" list="suplist" placeholder="Type a name…"
+                 value="${sel ? esc(sel.name) : ''}" oninput="pickSupByName(this.value)" style="min-width:300px">
+        </label>
+        <datalist id="suplist">${R.map(c => `<option value="${esc(c.name)}">`).join('')}</datalist>
+        <button class="p" onclick="newPaid()">+ New payment</button>
+        <span class="sub" style="margin:0 0 0 auto">${dues} with dues · total payable ${f(tot)}</span>
+      </div>
+    </div>
+    <div class="vat"><div><span>Total payable to suppliers</span><b>${f(tot)}</b></div><div><span>Suppliers with dues</span><b>${dues}</b></div><div><span>Advances / overpaid</span><b>${f(adv)}</b></div></div>
+    ${staffCard}
+    ${detail}`;
+};

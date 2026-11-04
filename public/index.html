@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#4E1521">
+  <title>Travel Co. Accounts</title>
+  <link rel="stylesheet" href="/styles/tokens.css">
+  <link rel="stylesheet" href="/styles/base.css">
+  <link rel="stylesheet" href="/styles/layout.css">
+  <link rel="stylesheet" href="/styles/components.css">
+  <link rel="stylesheet" href="/styles/pages.css">
+</head>
+
+<body>
+  <div class="app">
+    <aside class="side">
+      <div class="brand">
+        <div class="dev" lang="ne"><span class="full">लेखा</span><span class="short">ले</span></div>
+        <div class="lat">Travel &amp; Tours accounts</div>
+        <button class="tog" id="sbtog" type="button" onclick="toggleSide()"><svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="m15 6-6 6 6 6" />
+          </svg></button>
+      </div>
+      <nav id="nav" aria-label="Main"></nav>
+      <div class="co"><b id="co"></b><span id="cov"></span></div>
+    </aside>
+    <div class="pg">
+      <header class="top">
+        <div class="tt">
+          <h1 id="pgt"></h1>
+          <p id="pgs"></p>
+        </div>
+        <div class="period" id="period"><span>Period</span><input type="date" id="from" aria-label="From date"
+            onchange="if(!NOPERIOD.includes(tab))render()"><span aria-hidden="true">to</span><input type="date" id="to"
+            aria-label="To date" onchange="if(!NOPERIOD.includes(tab))render()">
+          <select id="pq" aria-label="Quick range" onchange="quickPeriod(this.value)">
+            <option value="">Quick range</option>
+            <option value="fy">This fiscal year</option>
+            <option value="pfy">Last fiscal year</option>
+            <option value="m">This month</option>
+            <option value="all">All dates</option>
+          </select>
+        </div>
+      </header>
+      <main id="m"></main>
+    </div>
+  </div>
+  <div id="toast" role="status" aria-live="polite"></div><datalist id="al"></datalist><datalist
+    id="pls"></datalist><datalist id="plc"></datalist><datalist id="stf"></datalist>
+  <script type="module" src="/app.js"></script>
+</body>
+
+</html>
